@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tennessee Permit Prep</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* Layout idea: one narrow column, one question card at a time, big tap targets for phone use. Single dark theme by choice, same family as the portfolio. */
+:root {
+  color-scheme: dark;
+  --ink: #0b1020;
+  --panel: #121a30;
+  --line: #24304f;
+  --text: #e6e9f2;
+  --muted: #8b95b3;
+  --amber: #ffb454;
+  --cyan: #5ccfe6;
+  --good: #7bd88f;
+  --bad: #ff6b6b;
+  --font-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  --font-body: "Be Vietnam Pro", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--ink); color: var(--text); font-family: var(--font-body); font-size: 16px; line-height: 1.6; }
+.wrap { max-width: 720px; margin: 0 auto; padding: 20px 16px 40px; display: grid; gap: 22px; }
+a { color: var(--cyan); }
+button { font: inherit; }
+:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+[hidden] { display: none !important; }
+
+.top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.top h1 { margin: 0 0 4px; font-size: clamp(1.4rem, 5vw, 1.9rem); line-height: 1.2; text-wrap: balance; }
+.top h1 span { color: var(--amber); }
+.top p { margin: 0; color: var(--muted); font-size: 15px; }
+.gear { flex: none; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; color: var(--text); padding: 8px 12px; cursor: pointer; font-family: var(--font-mono); font-size: 13px; }
+.gear:hover { border-color: var(--cyan); }
+
+.settings { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: grid; gap: 14px; }
+.set-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+.set-row span { font-size: 15px; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.seg button { background: transparent; border: 0; color: var(--muted); padding: 6px 14px; cursor: pointer; font-family: var(--font-mono); font-size: 13px; }
+.seg button[aria-pressed="true"] { background: var(--amber); color: var(--ink); font-weight: 700; }
+.danger { background: transparent; border: 1px solid var(--line); border-radius: 6px; color: var(--bad); padding: 6px 14px; cursor: pointer; font-size: 14px; }
+
+.facts { display: flex; flex-wrap: wrap; gap: 8px; font-family: var(--font-mono); font-size: 13px; }
+.facts span { border: 1px solid var(--line); border-radius: 4px; padding: 3px 10px; color: var(--cyan); }
+.modes { display: grid; gap: 12px; }
+.mode { display: grid; gap: 4px; text-align: left; width: 100%; background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--amber); border-radius: 8px; padding: 14px 18px; color: var(--text); cursor: pointer; }
+.mode:hover { border-color: var(--amber); }
+.mode.alt { border-left-color: var(--cyan); }
+.mode b { font-size: 1.05rem; }
+.mode small { color: var(--muted); font-size: 14px; }
+.mode[disabled] { opacity: .45; cursor: not-allowed; }
+h2 { margin: 0; font-family: var(--font-mono); font-size: 14px; font-weight: 500; color: var(--muted); }
+
+.cats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+.cats button { display: grid; gap: 8px; background: transparent; border: 1px solid var(--line); border-radius: 8px; padding: 12px; color: var(--text); font-size: 14px; cursor: pointer; text-align: left; }
+.cats button:hover { border-color: var(--cyan); }
+.cats small { color: var(--muted); font-family: var(--font-mono); font-size: 12px; }
+.meter { height: 4px; background: var(--line); border-radius: 2px; overflow: hidden; }
+.meter i { display: block; height: 100%; background: var(--good); }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.stats div { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px; text-align: center; }
+.stats b { display: block; font-family: var(--font-mono); font-size: 1.35rem; font-variant-numeric: tabular-nums; }
+.stats small { color: var(--muted); font-size: 12px; }
+
+.bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-family: var(--font-mono); font-size: 13px; color: var(--muted); }
+.link { background: none; border: 0; color: var(--cyan); cursor: pointer; padding: 4px 0; font-family: var(--font-mono); font-size: 13px; }
+.track { height: 4px; background: var(--line); border-radius: 2px; overflow: hidden; }
+.track i { display: block; height: 100%; background: var(--amber); }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 18px; display: grid; gap: 16px; }
+.card-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.tag { font-family: var(--font-mono); font-size: 12px; color: var(--amber); }
+.switch { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 12px; color: var(--muted); cursor: pointer; background: none; border: 0; padding: 4px; }
+.switch .on { color: var(--text); font-weight: 700; }
+.knob { position: relative; width: 38px; height: 20px; border-radius: 10px; background: var(--line); transition: background .15s; }
+.knob::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: var(--text); transition: transform .15s; }
+.switch[aria-checked="true"] .knob { background: var(--amber); }
+.switch[aria-checked="true"] .knob::after { transform: translateX(18px); }
+.q { margin: 0; font-size: 1.12rem; font-weight: 600; line-height: 1.45; }
+.sign { display: flex; justify-content: center; }
+.sign svg { width: 112px; height: 112px; }
+.opts { display: grid; gap: 10px; }
+.opts button { display: flex; gap: 10px; text-align: left; width: 100%; min-height: 48px; background: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; color: var(--text); cursor: pointer; }
+.opts button kbd { flex: none; font-family: var(--font-mono); font-size: 12px; color: var(--muted); padding-top: 3px; }
+.opts button:hover:not([disabled]) { border-color: var(--cyan); }
+.opts button.sel { border-color: var(--amber); }
+.opts button.right { border-color: var(--good); color: var(--good); }
+.opts button.wrong { border-color: var(--bad); color: var(--bad); }
+.opts button[disabled] { cursor: default; }
+.why { border-top: 1px dashed var(--line); padding-top: 14px; color: var(--muted); font-size: 15px; }
+.why b { color: var(--text); }
+.nav { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.next { background: var(--amber); color: var(--ink); border: 0; border-radius: 6px; padding: 10px 22px; font-weight: 700; cursor: pointer; }
+.next[disabled] { opacity: .4; cursor: not-allowed; }
+.ghost { background: transparent; color: var(--cyan); border: 1px solid var(--line); border-radius: 6px; padding: 10px 16px; cursor: pointer; }
+.ghost[disabled] { opacity: .35; cursor: not-allowed; }
+.note { margin: 0; color: var(--amber); font-size: 14px; text-align: right; }
+.dots { display: flex; flex-wrap: wrap; gap: 6px; }
+.dots button { width: 30px; height: 30px; border-radius: 6px; background: transparent; border: 1px solid var(--line); color: var(--muted); font-family: var(--font-mono); font-size: 12px; cursor: pointer; padding: 0; }
+.dots button.done { border-color: var(--cyan); color: var(--cyan); }
+.dots button.cur { background: var(--amber); border-color: var(--amber); color: var(--ink); font-weight: 700; }
+.hint { margin: 0; color: var(--muted); font-size: 12px; font-family: var(--font-mono); text-align: center; }
+
+.score { text-align: center; display: grid; gap: 6px; }
+.score .num { font-family: var(--font-mono); font-size: 3rem; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.pass { color: var(--good); } .fail { color: var(--bad); }
+.breakdown { display: grid; gap: 8px; text-align: left; font-size: 14px; margin-top: 8px; }
+.breakdown div { display: flex; justify-content: space-between; gap: 10px; border-top: 1px dashed var(--line); padding-top: 8px; }
+.breakdown b { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.review { display: grid; gap: 12px; }
+.review article { background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--bad); border-radius: 8px; padding: 14px 16px; display: grid; gap: 6px; font-size: 15px; }
+.review p { margin: 0; }
+.review .a { color: var(--good); } .review .y { color: var(--bad); } .review .w { color: var(--muted); }
+.row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+
+.chat { display: grid; gap: 12px; }
+.log { display: grid; gap: 10px; max-height: 52vh; overflow-y: auto; padding-right: 2px; }
+.msg { max-width: 92%; border-radius: 10px; padding: 10px 14px; font-size: 15px; white-space: pre-wrap; }
+.msg.me { justify-self: end; background: var(--amber); color: var(--ink); }
+.msg.bot { justify-self: start; background: var(--ink); border: 1px solid var(--line); }
+.msg.bot small { display: block; margin-top: 8px; color: var(--muted); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chips button { background: transparent; border: 1px solid var(--line); border-radius: 16px; padding: 5px 12px; color: var(--cyan); font-size: 13px; cursor: pointer; }
+.chips button:hover { border-color: var(--cyan); }
+.ask { display: flex; gap: 8px; }
+.ask input { flex: 1; min-width: 0; background: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; color: var(--text); font: inherit; }
+
+footer { display: grid; gap: 10px; color: var(--muted); font-size: 13px; }
+.sig { justify-self: end; font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.sig b { color: var(--amber); font-weight: 500; }
+@media (prefers-reduced-motion: reduce) { .knob, .knob::after { transition: none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <h1 id="title"></h1>
+      <p id="sub"></p>
+    </div>
+    <button type="button" class="gear" id="gear" aria-expanded="false"></button>
+  </div>
+  <div class="settings" id="settings" hidden></div>
+  <main id="app"></main>
+  <footer>
+    <span id="disc"></span>
+    <span class="sig">made by <b>Tuan Phong Vo</b></span>
+  </footer>
+</div>
+
+<script>
+(function () {
+  // ---------- interface text ----------
+  var T = {
+    en: {
+      title: ['Tennessee ', 'Permit Prep'], sub: 'Practice for the driver knowledge test. Questions in English, Vietnamese one switch away.',
+      gear: 'Settings', uiLang: 'Interface language', qLang: 'Questions open in', reset: 'Reset my progress', resetDone: 'Progress cleared',
+      f1: '30 questions', f2: 'pass with 24 (80%)', f3: '4 sections',
+      exam: 'Exam simulator', examSub: '30 random questions, right or wrong shown after each answer, 24 to pass.',
+      all: 'Practice all {n} questions', allSub: 'See the answer and an explanation right after each pick.',
+      weak: 'Review my mistakes ({n})', weakSub: 'Questions you got wrong on this device.', weakNone: 'No mistakes saved yet.',
+      ask: 'Study assistant', askSub: 'Type a question about Tennessee road rules, in English or Vietnamese.',
+      bySec: '# practice by section', prog: '# your progress',
+      mastered: 'answered right', best: 'best exam', taken: 'exams taken', of: 'of',
+      quit: '← Quit', next: 'Next', prev: 'Back', finish: 'See results', finishAny: 'Finish anyway',
+      unanswered: '{n} unanswered. They count as wrong.', keys: 'Keys: 1-4 to pick, Enter for next',
+      right: 'Correct. ', wrong: 'Not quite. ', passMsg: 'Passed. You needed {need}, you got {right}.', failMsg: 'Not yet. You needed {need}, you got {right}.',
+      pct: '{label}: {p}% correct.', time: 'Time', home: 'Back to start', retry: 'Try again',
+      missedHead: '# missed questions ({n})', you: 'You picked: ', none: 'no answer', ans: 'Answer: ',
+      disc: 'Unofficial practice questions written for study. The real test is drawn from the Tennessee Comprehensive Driver License Manual on tn.gov, so read it before test day.',
+      askPh: 'e.g. speed limit in a school zone', send: 'Ask',
+      hello: 'Ask me about speed limits, signs, right-of-way, DUI rules, parking distances, or what to do in an emergency. I answer from a built-in study guide, so I only know Tennessee driving topics.',
+      noHit: "I don't have that in my study guide. Try a topic like: school bus, BAC limit, headlights, four-way stop, hydroplaning.",
+      related: 'Related practice question:', chips: ['School zone speed', 'BAC limit under 21', 'When to use headlights', 'Four-way stop', 'School bus rules', 'How many questions?']
+    },
+    vi: {
+      title: ['Ôn thi ', 'bằng lái Tennessee'], sub: 'Luyện thi lý thuyết lái xe. Câu hỏi tiếng Anh, gạt công tắc là ra tiếng Việt.',
+      gear: 'Cài đặt', uiLang: 'Ngôn ngữ giao diện', qLang: 'Câu hỏi mở bằng', reset: 'Xóa tiến độ của tôi', resetDone: 'Đã xóa tiến độ',
+      f1: '30 câu', f2: 'đậu từ 24 câu (80%)', f3: '4 phần',
+      exam: 'Thi thử', examSub: '30 câu ngẫu nhiên, trả lời xong biết đúng sai ngay, cần đúng 24 câu.',
+      all: 'Luyện tất cả {n} câu', allSub: 'Chọn xong hiện đáp án và giải thích ngay.',
+      weak: 'Ôn lại câu sai ({n})', weakSub: 'Những câu bạn từng chọn sai trên máy này.', weakNone: 'Chưa có câu sai nào được lưu.',
+      ask: 'Trợ lý học tập', askSub: 'Gõ câu hỏi về luật lái xe Tennessee, tiếng Việt hay tiếng Anh đều được.',
+      bySec: '# luyện theo phần', prog: '# tiến độ của bạn',
+      mastered: 'câu đã đúng', best: 'điểm thi cao nhất', taken: 'lần thi thử', of: 'trên',
+      quit: '← Thoát', next: 'Câu tiếp', prev: 'Quay lại', finish: 'Xem kết quả', finishAny: 'Vẫn nộp bài',
+      unanswered: 'Còn {n} câu chưa làm. Chúng sẽ tính là sai.', keys: 'Phím: 1-4 để chọn, Enter để qua câu',
+      right: 'Đúng. ', wrong: 'Chưa đúng. ', passMsg: 'Đậu. Cần {need} câu, bạn đúng {right}.', failMsg: 'Chưa đậu. Cần {need} câu, bạn mới đúng {right}.',
+      pct: '{label}: đúng {p}%.', time: 'Thời gian', home: 'Về trang đầu', retry: 'Làm lại',
+      missedHead: '# các câu sai ({n})', you: 'Bạn chọn: ', none: 'chưa trả lời', ans: 'Đáp án: ',
+      disc: 'Bộ câu hỏi luyện tập tự soạn, không phải đề chính thức. Đề thật lấy từ Tennessee Comprehensive Driver License Manual trên tn.gov, nên đọc sách đó trước khi đi thi.',
+      askPh: 'vd: tốc độ ở khu trường học', send: 'Hỏi',
+      hello: 'Hỏi tôi về tốc độ, biển báo, quyền ưu tiên, luật DUI, khoảng cách đậu xe, hay cách xử lý tình huống khẩn cấp. Tôi trả lời từ bộ tài liệu có sẵn trong trang, nên chỉ biết các chủ đề lái xe ở Tennessee.',
+      noHit: 'Tài liệu của tôi chưa có phần đó. Thử hỏi theo chủ đề như: xe buýt trường, nồng độ cồn, đèn pha, ngã tư bốn biển dừng, trượt nước.',
+      related: 'Câu luyện tập liên quan:', chips: ['Tốc độ khu trường học', 'Nồng độ cồn dưới 21 tuổi', 'Khi nào bật đèn pha', 'Ngã tư 4 biển dừng', 'Luật xe buýt trường', 'Thi bao nhiêu câu?']
+    }
+  };
+  var CATS = {
+    signs: { en: 'Signs, signals, markings', vi: 'Biển báo, đèn, vạch kẻ' },
+    rules: { en: 'Rules of the road', vi: 'Luật đi đường' },
+    alcohol: { en: 'Alcohol and drugs', vi: 'Rượu bia và chất kích thích' },
+    safe: { en: 'Safe driving', vi: 'Lái xe an toàn' }
+  };
+
+  var SIGNS = {
+    octagon: '<svg viewBox="0 0 100 100" role="img" aria-label="Red eight-sided sign"><polygon points="30,5 70,5 95,30 95,70 70,95 30,95 5,70 5,30" fill="#d62828" stroke="#fff" stroke-width="4"/></svg>',
+    yield: '<svg viewBox="0 0 100 100" role="img" aria-label="Red and white downward triangle sign"><polygon points="5,10 95,10 50,92" fill="#d62828"/><polygon points="24,22 76,22 50,70" fill="#fff"/></svg>',
+    diamond: '<svg viewBox="0 0 100 100" role="img" aria-label="Yellow diamond sign"><polygon points="50,5 95,50 50,95 5,50" fill="#f9c80e" stroke="#111" stroke-width="3"/></svg>',
+    pentagon: '<svg viewBox="0 0 100 100" role="img" aria-label="Five-sided sign shaped like a house"><polygon points="50,5 93,40 93,95 7,95 7,40" fill="#c8e000" stroke="#111" stroke-width="3"/></svg>',
+    round: '<svg viewBox="0 0 100 100" role="img" aria-label="Round yellow sign with a black X"><circle cx="50" cy="50" r="45" fill="#f9c80e" stroke="#111" stroke-width="3"/><path d="M22 22 L78 78 M78 22 L22 78" stroke="#111" stroke-width="7"/></svg>',
+    donotenter: '<svg viewBox="0 0 100 100" role="img" aria-label="Red circle with a white horizontal bar"><circle cx="50" cy="50" r="45" fill="#d62828" stroke="#fff" stroke-width="3"/><rect x="20" y="42" width="60" height="16" fill="#fff"/></svg>',
+    smv: '<svg viewBox="0 0 100 100" role="img" aria-label="Orange triangle with a red border"><polygon points="50,6 96,90 4,90" fill="#d62828"/><polygon points="50,30 76,78 24,78" fill="#ff7a00"/></svg>',
+    crossbuck: '<svg viewBox="0 0 100 100" role="img" aria-label="White X-shaped sign"><g stroke="#111" stroke-width="2" fill="#fff"><rect x="5" y="40" width="90" height="20" transform="rotate(35 50 50)"/><rect x="5" y="40" width="90" height="20" transform="rotate(-35 50 50)"/></g></svg>',
+    pennant: '<svg viewBox="0 0 100 100" role="img" aria-label="Yellow sideways triangle pennant sign"><polygon points="5,22 95,50 5,78" fill="#f9c80e" stroke="#111" stroke-width="3"/></svg>'
+  };
+
+  // extra drawings built from small helpers: signals, road markings, colored signs
+  (function () {
+    var OFF = '#2a2f3d', R = '#e5383b', Y = '#f9c80e', G = '#2dc653';
+    function wrap(inner) { return '<svg viewBox="0 0 100 100" role="img" aria-label="Illustration for this question">' + inner + '</svg>'; }
+    function rays(cy, col) { return '<g stroke="' + col + '" stroke-width="3" stroke-linecap="round"><path d="M22 ' + cy + ' H14 M78 ' + cy + ' H86 M26 ' + (cy - 10) + ' L19 ' + (cy - 15) + ' M74 ' + (cy - 10) + ' L81 ' + (cy - 15) + ' M26 ' + (cy + 10) + ' L19 ' + (cy + 15) + ' M74 ' + (cy + 10) + ' L81 ' + (cy + 15) + '"/></g>'; }
+    function arrow(cy, col) { return '<path d="M38 ' + cy + ' L50 ' + (cy - 9) + ' V' + (cy - 4) + ' H62 V' + (cy + 4) + ' H50 V' + (cy + 9) + ' Z" fill="' + col + '"/>'; }
+    function signal(o) {
+      var cys = [22, 50, 78], cols = [o.r ? R : OFF, o.y ? Y : OFF, o.g ? G : OFF], out = '<rect x="30" y="4" width="40" height="92" rx="8" fill="#11141c" stroke="#555" stroke-width="2"/>';
+      cys.forEach(function (cy, i) { out += '<circle cx="50" cy="' + cy + '" r="12" fill="' + cols[i] + '"/>'; });
+      if (o.arrow === 'g') out += arrow(78, G);
+      if (o.arrow === 'y') out += arrow(50, Y);
+      if (o.flash === 'r') out += rays(22, R);
+      if (o.flash === 'y') out += rays(50, Y);
+      return wrap(out);
+    }
+    function line(x, col, dashed) { return '<line x1="' + x + '" y1="0" x2="' + x + '" y2="100" stroke="' + col + '" stroke-width="4"' + (dashed ? ' stroke-dasharray="14 12"' : '') + '/>'; }
+    function road(inner) { return wrap('<rect width="100" height="100" rx="6" fill="#3a3f4b"/>' + inner); }
+    function plate(fill, text, txtFill) { return wrap('<rect x="6" y="24" width="88" height="52" rx="5" fill="' + fill + '" stroke="#fff" stroke-width="3"/>' + (text ? '<text x="50" y="57" text-anchor="middle" font-family="sans-serif" font-weight="700" font-size="16" fill="' + (txtFill || '#fff') + '">' + text + '</text>' : '')); }
+    var W = '#f5f5f5';
+    SIGNS.orange = wrap('<polygon points="50,5 95,50 50,95 5,50" fill="#ff7a00" stroke="#111" stroke-width="3"/>');
+    SIGNS.flashred = signal({ r: 1, flash: 'r' });
+    SIGNS.flashyellow = signal({ y: 1, flash: 'y' });
+    SIGNS.steadyyellow = signal({ y: 1 });
+    SIGNS.steadyred = signal({ r: 1 });
+    SIGNS.dark = signal({});
+    SIGNS.greenarrow = signal({ r: 1, arrow: 'g' });
+    SIGNS.yellowarrow = signal({ arrow: 'y', flash: 'y' });
+    SIGNS.dblyellow = road(line(46, Y) + line(54, Y));
+    SIGNS.brokenwhite = road(line(50, W, true));
+    SIGNS.solidwhite = road(line(50, W));
+    SIGNS.brokenyellow = road(line(50, Y, true));
+    SIGNS.solidside = road(line(46, Y, true) + line(54, Y) + '<path d="M76 88 V62 M76 62 L70 70 M76 62 L82 70" stroke="' + W + '" stroke-width="3" fill="none" stroke-linecap="round"/>');
+    SIGNS.stopline = road(line(50, Y) + line(46, Y) + '<rect x="54" y="30" width="46" height="9" fill="' + W + '"/>');
+    SIGNS.centerlane = road(line(28, Y) + line(36, Y, true) + line(64, Y, true) + line(72, Y));
+    SIGNS.whiterect = wrap('<rect x="22" y="8" width="56" height="84" rx="5" fill="#fff" stroke="#111" stroke-width="3"/><text x="50" y="30" text-anchor="middle" font-family="sans-serif" font-weight="700" font-size="11" fill="#111">SPEED</text><text x="50" y="43" text-anchor="middle" font-family="sans-serif" font-weight="700" font-size="11" fill="#111">LIMIT</text><text x="50" y="80" text-anchor="middle" font-family="sans-serif" font-weight="700" font-size="34" fill="#111">55</text>');
+    SIGNS.green = plate('#1b7f4a', 'EXIT 12');
+    SIGNS.blue = plate('#1d5fbf', 'H');
+    SIGNS.brown = plate('#7a4a21', 'PARK');
+    SIGNS.slash = wrap('<circle cx="50" cy="50" r="42" fill="#fff" stroke="#d62828" stroke-width="9"/><text x="50" y="68" text-anchor="middle" font-family="sans-serif" font-weight="700" font-size="50" fill="#111">P</text><line x1="21" y1="21" x2="79" y2="79" stroke="#d62828" stroke-width="9"/>');
+  })();
+
+  // ---------- questions: [section, sign, q, options (first is correct), explanation, vi q, vi options, vi explanation] ----------
+  var RAW = [
+    ['signs', 'octagon', 'A red sign with eight sides always means:', ['Stop', 'Yield', 'Do not enter', 'Railroad crossing'], 'An eight-sided red sign is always a STOP sign. Come to a complete stop.',
+      'Biển màu đỏ có tám cạnh luôn có nghĩa là:', ['Dừng lại', 'Nhường đường', 'Cấm vào', 'Đường ray xe lửa'], 'Biển 8 cạnh màu đỏ luôn là biển STOP: dừng hẳn xe.'],
+    ['signs', 'yield', 'A sign with this shape means:', ['Yield the right-of-way', 'Stop completely every time', 'No passing zone', 'School zone'], 'A downward-pointing triangle is a YIELD sign. Slow down, give way, and stop only if needed.',
+      'Biển có hình dạng này nghĩa là:', ['Nhường quyền ưu tiên', 'Lần nào cũng phải dừng hẳn', 'Đoạn cấm vượt', 'Khu vực trường học'], 'Tam giác ngược là biển YIELD: giảm tốc, nhường xe và người đi bộ, chỉ dừng nếu cần.'],
+    ['signs', 'diamond', 'Yellow diamond-shaped signs are used to:', ['Warn of hazards or changes in the road ahead', 'Give directions and distances', 'Show speed limits', 'Mark hospital locations'], 'Yellow diamond signs are warning signs: a hazard or a change in the road is ahead.',
+      'Biển hình thoi màu vàng dùng để:', ['Cảnh báo nguy hiểm hoặc thay đổi của đường phía trước', 'Chỉ hướng và khoảng cách', 'Ghi giới hạn tốc độ', 'Đánh dấu vị trí bệnh viện'], 'Biển hình thoi màu vàng là biển cảnh báo: phía trước có nguy hiểm hoặc đường thay đổi.'],
+    ['signs', 'pentagon', 'A five-sided sign shaped like this warns of:', ['A school zone or school crossing', 'A railroad crossing', 'A no passing zone', 'Road construction'], 'The five-sided sign marks a school zone or a school crossing.',
+      'Biển năm cạnh có hình như thế này cảnh báo:', ['Khu vực trường học hoặc chỗ học sinh qua đường', 'Đường ray xe lửa', 'Đoạn cấm vượt', 'Đường đang thi công'], 'Biển 5 cạnh (hình ngôi nhà) báo khu vực trường học hoặc chỗ học sinh qua đường.'],
+    ['signs', 'round', 'A round yellow sign with a black X means:', ['Railroad crossing ahead', 'Crossroad ahead', 'Road closed', 'Hospital ahead'], 'A round yellow sign with an X is the advance warning for a railroad crossing.',
+      'Biển tròn màu vàng có chữ X đen nghĩa là:', ['Sắp tới đường ray xe lửa', 'Sắp tới ngã tư', 'Đường bị đóng', 'Sắp tới bệnh viện'], 'Biển tròn vàng có chữ X là báo trước sắp tới đường ray xe lửa.'],
+    ['signs', 'pennant', 'A pennant-shaped sign on the left side of the road means:', ['No passing zone', 'Merge left', 'Yield ahead', 'Slow moving vehicle'], 'The pennant-shaped sign on the left side of the road marks a no passing zone.',
+      'Biển hình cờ đuôi nheo đặt bên trái đường nghĩa là:', ['Đoạn cấm vượt', 'Nhập làn trái', 'Sắp có biển nhường đường', 'Xe chạy chậm'], 'Biển hình cờ đuôi nheo (tam giác nằm ngang) đặt bên trái đường: đoạn cấm vượt.'],
+    ['signs', 'orange', 'Orange signs are used for:', ['Construction and maintenance work zones', 'School zones', 'Recreation areas', 'Motorist services'], 'Orange means construction or maintenance. Slow down and watch for workers.',
+      'Biển màu cam dùng cho:', ['Khu vực thi công, bảo trì đường', 'Khu vực trường học', 'Khu giải trí', 'Dịch vụ cho tài xế'], 'Biển màu cam là khu vực đang thi công, sửa đường. Giảm tốc và chú ý công nhân.'],
+    ['signs', 'flashred', 'A flashing red traffic light means:', ['Stop completely, then go when it is safe', 'Slow down and proceed with caution', 'The light is about to turn green', 'Stop only if other cars are coming'], 'Treat a flashing red light exactly like a stop sign.',
+      'Đèn đỏ nhấp nháy nghĩa là:', ['Dừng hẳn, rồi đi khi an toàn', 'Giảm tốc và đi tiếp cẩn thận', 'Đèn sắp chuyển xanh', 'Chỉ dừng khi có xe khác tới'], 'Đèn đỏ nhấp nháy xử lý y như biển STOP: dừng hẳn rồi mới đi khi an toàn.'],
+    ['signs', 'flashyellow', 'A flashing yellow traffic light means:', ['Slow down and proceed with caution', 'Stop completely', 'Speed up to clear the intersection', 'The signal is broken, treat it as a four-way stop'], 'Flashing yellow: slow down, look, and proceed with caution. A full stop is not required.',
+      'Đèn vàng nhấp nháy nghĩa là:', ['Giảm tốc và đi tiếp cẩn thận', 'Dừng hẳn', 'Tăng tốc để qua ngã tư', 'Đèn hỏng, xử lý như ngã tư bốn biển dừng'], 'Đèn vàng nhấp nháy: giảm tốc, quan sát rồi đi tiếp cẩn thận, không bắt buộc dừng.'],
+    ['signs', 'steadyyellow', 'A steady yellow traffic light means:', ['The light is about to turn red, stop if you can do so safely', 'Speed up before the light changes', 'Yield to cross traffic only', 'Left turns are now protected'], 'Steady yellow warns that red is next. Stop if you can do it safely.',
+      'Đèn vàng sáng liên tục nghĩa là:', ['Đèn sắp chuyển đỏ, hãy dừng nếu dừng được an toàn', 'Tăng tốc trước khi đèn đổi', 'Chỉ cần nhường xe đi ngang', 'Rẽ trái lúc này được ưu tiên'], 'Đèn vàng liên tục: sắp chuyển đỏ. Dừng lại nếu dừng được an toàn.'],
+    ['signs', 'dblyellow', 'A double solid yellow line in the center of the road means:', ['Passing is not allowed from either direction', 'Passing is allowed from both directions', 'Only the right lane may pass', 'The road is one-way'], 'Double solid yellow lines mean no passing in either direction.',
+      'Hai vạch vàng liền ở giữa đường nghĩa là:', ['Cả hai chiều đều không được vượt', 'Cả hai chiều đều được vượt', 'Chỉ làn phải được vượt', 'Đường một chiều'], 'Hai vạch vàng liền ở giữa đường: cả hai chiều đều cấm vượt.'],
+    ['signs', 'brokenwhite', 'A broken white line between lanes means:', ['Traffic moves the same direction and you may change lanes when safe', 'Traffic moves in opposite directions', 'Lane changes are not allowed', 'The lane is ending'], 'Broken white lines separate lanes going the same way. You may change lanes when it is safe.',
+      'Vạch trắng đứt giữa các làn nghĩa là:', ['Các làn cùng chiều, được đổi làn khi an toàn', 'Các làn ngược chiều nhau', 'Không được đổi làn', 'Làn sắp kết thúc'], 'Vạch trắng đứt: các làn cùng chiều, được đổi làn khi an toàn.'],
+    ['signs', 'whiterect', 'Rectangular white signs with black letters usually:', ['State laws and regulations you must obey', 'Warn of hazards ahead', 'Show distances to cities', 'Mark work zones'], 'White rectangular signs are regulatory signs, such as speed limits. You must obey them.',
+      'Biển chữ nhật nền trắng chữ đen thường:', ['Ghi luật và quy định bắt buộc phải theo', 'Cảnh báo nguy hiểm phía trước', 'Ghi khoảng cách tới các thành phố', 'Đánh dấu khu thi công'], 'Biển chữ nhật trắng chữ đen là biển quy định (như Speed Limit): bắt buộc phải theo.'],
+    ['signs', 'greenarrow', 'A green arrow shown with a red light means:', ['You may turn in the direction of the arrow, oncoming traffic is stopped', 'You must stop and wait for a green light', 'You may turn only after stopping', 'You may go straight through the intersection'], 'A green arrow gives you a protected turn in the direction it points.',
+      'Mũi tên xanh hiện cùng lúc với đèn đỏ nghĩa là:', ['Được rẽ theo hướng mũi tên, xe ngược chiều đang bị dừng', 'Phải dừng chờ đèn xanh', 'Chỉ được rẽ sau khi dừng', 'Được đi thẳng qua ngã tư'], 'Mũi tên xanh: được rẽ theo hướng mũi tên, xe chiều ngược lại đang bị dừng.'],
+
+    ['rules', '', 'Under Tennessee law, you must signal at least how far before you turn?', ['50 feet', '10 feet', '25 feet', '200 feet'], 'Tennessee law requires a signal for at least the last 50 feet before a turn.',
+      'Theo luật Tennessee, phải bật xi nhan trước khi rẽ ít nhất bao xa?', ['50 feet', '10 feet', '25 feet', '200 feet'], 'Luật Tennessee: bật xi nhan ít nhất 50 feet (khoảng 15 mét) trước khi rẽ.'],
+    ['rules', '', 'The maximum speed limit on Tennessee interstate highways is:', ['70 mph', '55 mph', '65 mph', '80 mph'], 'The interstate maximum in Tennessee is 70 mph. A lower posted limit always wins.',
+      'Tốc độ tối đa trên đường interstate ở Tennessee là:', ['70 mph', '55 mph', '65 mph', '80 mph'], 'Tốc độ tối đa trên interstate ở Tennessee là 70 mph. Biển ghi thấp hơn thì theo biển.'],
+    ['rules', '', 'When school zone warning flashers are operating, the speed limit is usually:', ['15 mph', '10 mph', '25 mph', '35 mph'], 'In an active school zone the limit is 15 mph unless a sign shows something else.',
+      'Khi đèn cảnh báo khu trường học đang nháy, giới hạn tốc độ thường là:', ['15 mph', '10 mph', '25 mph', '35 mph'], 'Khu trường học khi đèn cảnh báo đang nháy: 15 mph, trừ khi biển ghi khác.'],
+    ['rules', '', 'In Tennessee, headlights must be on:', ['From 30 minutes after sunset to 30 minutes before sunrise', 'Only when it is completely dark', 'From 60 minutes after sunset to 60 minutes before sunrise', 'Only on highways'], 'Use headlights from 30 minutes after sunset until 30 minutes before sunrise, and any time visibility is poor.',
+      'Ở Tennessee, phải bật đèn pha:', ['Từ 30 phút sau khi mặt trời lặn tới 30 phút trước khi mặt trời mọc', 'Chỉ khi trời tối hẳn', 'Từ 60 phút sau khi mặt trời lặn tới 60 phút trước khi mặt trời mọc', 'Chỉ trên đường cao tốc'], 'Bật đèn pha từ 30 phút sau khi mặt trời lặn tới 30 phút trước khi mặt trời mọc, và khi tầm nhìn kém.'],
+    ['rules', '', 'You must dim your high beams when you are within how many feet of a vehicle you are meeting or following?', ['500 feet', '100 feet', '200 feet', '1,000 feet'], 'Switch to low beams within 500 feet of another vehicle.',
+      'Phải hạ đèn pha khi cách xe đi ngược chiều hoặc xe phía trước trong vòng bao nhiêu feet?', ['500 feet', '100 feet', '200 feet', '1.000 feet'], 'Hạ đèn pha xuống cos khi cách xe khác trong vòng 500 feet.'],
+    ['rules', '', 'You may not park within how many feet of a fire hydrant?', ['15 feet', '5 feet', '30 feet', '50 feet'], 'Keep at least 15 feet between your parked car and a fire hydrant.',
+      'Không được đậu xe trong vòng bao nhiêu feet quanh trụ cứu hỏa?', ['15 feet', '5 feet', '30 feet', '50 feet'], 'Không đậu xe trong vòng 15 feet quanh trụ cứu hỏa.'],
+    ['rules', '', 'When a train is approaching a railroad crossing, you must stop:', ['Between 15 and 50 feet from the nearest rail', 'Right at the edge of the rail', 'At least 100 feet from the rail', 'Only if the gates are down'], 'Stop no closer than 15 feet and no farther than 50 feet from the nearest rail.',
+      'Khi tàu đang tới chỗ giao với đường ray, bạn phải dừng:', ['Cách đường ray gần nhất từ 15 tới 50 feet', 'Ngay sát mép đường ray', 'Cách đường ray ít nhất 100 feet', 'Chỉ khi thanh chắn hạ xuống'], 'Khi tàu sắp tới: dừng cách đường ray gần nhất từ 15 tới 50 feet.'],
+    ['rules', '', 'Two vehicles reach a four-way stop at the same time. Who goes first?', ['The driver on the right', 'The driver on the left', 'The larger vehicle', 'The driver going straight'], 'At a four-way stop, first to arrive goes first. In a tie, yield to the driver on your right.',
+      'Hai xe tới ngã tư bốn biển dừng cùng lúc. Ai đi trước?', ['Xe ở bên phải', 'Xe ở bên trái', 'Xe lớn hơn', 'Xe đi thẳng'], 'Ngã tư 4 biển STOP: ai tới trước đi trước. Tới cùng lúc thì nhường xe bên phải.'],
+    ['rules', '', 'A school bus is stopped on a two-lane road with its red lights flashing. You must:', ['Stop, whichever direction you are traveling', 'Stop only if you are behind the bus', 'Slow to 15 mph and pass carefully', 'Honk and proceed'], 'On a two-lane road, traffic in both directions must stop until the red lights go off.',
+      'Xe buýt trường đang dừng trên đường hai làn và nháy đèn đỏ. Bạn phải:', ['Dừng lại, dù đang đi chiều nào', 'Chỉ dừng nếu ở phía sau xe buýt', 'Giảm xuống 15 mph rồi vượt cẩn thận', 'Bấm còi rồi đi tiếp'], 'Xe buýt trường nháy đèn đỏ trên đường 2 làn: xe ở cả hai chiều đều phải dừng tới khi đèn tắt.'],
+    ['rules', '', 'Turning right on a red light is:', ['Allowed after a complete stop, unless a sign prohibits it', 'Never allowed', 'Allowed without stopping if no cars are coming', 'Allowed only on one-way streets'], 'You may turn right on red after a full stop and yielding, unless a No Turn On Red sign is posted.',
+      'Rẽ phải khi đèn đỏ thì:', ['Được phép sau khi dừng hẳn, trừ khi có biển cấm', 'Không bao giờ được phép', 'Được phép không cần dừng nếu không có xe tới', 'Chỉ được phép trên đường một chiều'], 'Được rẽ phải khi đèn đỏ sau khi dừng hẳn và nhường đường, trừ khi có biển No Turn On Red.'],
+    ['rules', '', 'An emergency vehicle is coming toward you with siren and lights on. You should:', ['Pull over to the right edge of the road and stop', 'Speed up to get out of the way', 'Stop immediately where you are', 'Keep driving at the same speed'], 'Pull to the right edge of the road and stop until the emergency vehicle has passed.',
+      'Xe ưu tiên đang tới, hú còi và bật đèn. Bạn nên:', ['Tấp vào sát lề phải rồi dừng lại', 'Tăng tốc để tránh đường', 'Dừng ngay tại chỗ', 'Giữ nguyên tốc độ đi tiếp'], 'Xe ưu tiên hú còi, bật đèn: tấp sát lề phải rồi dừng lại cho tới khi nó qua.'],
+    ['rules', '', "Tennessee's Move Over law requires that when you approach a stopped emergency vehicle with flashing lights, you:", ['Move over one lane if you safely can, otherwise slow down', 'Stop behind it and wait', 'Turn on your hazard lights and keep your speed', 'Honk to warn the officer'], 'Move Over law: change to a lane away from the stopped vehicle if you can, or slow down if you cannot.',
+      'Luật Move Over của Tennessee yêu cầu khi tới gần xe ưu tiên đang dừng và nháy đèn, bạn phải:', ['Chuyển sang làn bên cạnh nếu an toàn, không được thì giảm tốc', 'Dừng phía sau và chờ', 'Bật đèn khẩn cấp và giữ nguyên tốc độ', 'Bấm còi báo cho cảnh sát'], 'Luật Move Over: thấy xe ưu tiên dừng bên lề có đèn nháy thì chuyển sang làn xa hơn nếu được, không thì giảm tốc.'],
+    ['rules', '', "Under Tennessee's hands-free law, while driving you may not:", ['Hold a phone in your hand', 'Use a mounted GPS', 'Talk through a hands-free device', 'Listen to the radio'], 'You may not hold a phone while driving. Hands-free and mounted devices are allowed.',
+      'Theo luật hands-free của Tennessee, khi đang lái bạn không được:', ['Cầm điện thoại trên tay', 'Dùng GPS gắn trên giá', 'Nói chuyện qua thiết bị rảnh tay', 'Nghe radio'], 'Luật hands-free: không được cầm điện thoại trên tay khi đang lái. Dùng loa hoặc giá gắn thì được.'],
+    ['rules', '', 'A pedestrian is in a marked crosswalk in front of you. You must:', ['Yield and let the pedestrian cross', 'Honk so they hurry', 'Drive around them carefully', 'Proceed if you have a green light'], 'Always yield to a pedestrian in a crosswalk.',
+      'Có người đi bộ đang ở trong vạch qua đường trước mặt bạn. Bạn phải:', ['Nhường và để họ đi qua', 'Bấm còi cho họ đi nhanh', 'Lái vòng qua họ cẩn thận', 'Cứ đi nếu bạn có đèn xanh'], 'Người đi bộ đang ở trong vạch qua đường: luôn phải nhường.'],
+    ['rules', '', 'When passing a bicyclist in Tennessee, you must leave at least:', ['3 feet of space', '1 foot of space', '6 inches of space', 'No specific distance'], 'Leave at least 3 feet between your vehicle and a bicycle when you pass.',
+      'Khi vượt người đi xe đạp ở Tennessee, phải cách ít nhất:', ['3 feet', '1 foot', '6 inch', 'Không quy định khoảng cách'], 'Vượt xe đạp phải cách ít nhất 3 feet (gần 1 mét).'],
+
+    ['alcohol', '', 'For drivers 21 or older, it is illegal to drive with a blood alcohol concentration (BAC) of:', ['0.08% or higher', '0.02% or higher', '0.10% or higher', '0.05% or higher'], 'For drivers 21 and over, 0.08% BAC or more is DUI.',
+      'Với tài xế từ 21 tuổi trở lên, lái xe là phạm luật khi nồng độ cồn trong máu (BAC) từ:', ['0,08% trở lên', '0,02% trở lên', '0,10% trở lên', '0,05% trở lên'], 'Từ 21 tuổi trở lên: BAC từ 0,08% là phạm luật DUI.'],
+    ['alcohol', '', 'For drivers under 21 in Tennessee, the BAC limit is:', ['0.02%', '0.08%', '0.04%', '0.10%'], 'Under 21 the limit is 0.02%, which is close to zero.',
+      'Với tài xế dưới 21 tuổi ở Tennessee, giới hạn BAC là:', ['0,02%', '0,08%', '0,04%', '0,10%'], 'Dưới 21 tuổi: giới hạn chỉ 0,02%, gần như không được uống.'],
+    ['alcohol', '', "Tennessee's implied consent law means that by driving you have agreed to:", ['Take a test for alcohol or drugs if lawfully arrested for DUI', 'Let police search your car at any time', 'Carry insurance on your vehicle', 'Never drink alcohol'], 'Implied consent: driving in Tennessee counts as agreeing to chemical testing after a lawful DUI arrest.',
+      'Luật implied consent của Tennessee nghĩa là khi lái xe, bạn đã đồng ý:', ['Cho kiểm tra rượu hoặc ma túy nếu bị bắt hợp pháp vì DUI', 'Cho cảnh sát khám xe bất cứ lúc nào', 'Mua bảo hiểm cho xe', 'Không bao giờ uống rượu'], 'Implied consent: cứ lái xe ở Tennessee là coi như đã đồng ý cho kiểm tra nồng độ cồn, ma túy khi bị bắt vì nghi DUI.'],
+    ['alcohol', '', 'If you refuse a chemical test after a DUI arrest, you can:', ['Lose your driving privilege even without a DUI conviction', 'Avoid all penalties', 'Only receive a warning', 'Choose to pay a small fee instead'], 'Refusing the test can cost you your license, even if you are never convicted of DUI.',
+      'Nếu từ chối kiểm tra sau khi bị bắt vì DUI, bạn có thể:', ['Bị tước quyền lái xe dù không bị kết tội DUI', 'Tránh được mọi hình phạt', 'Chỉ bị nhắc nhở', 'Chọn đóng một khoản phí nhỏ thay thế'], 'Từ chối kiểm tra thì vẫn có thể bị tước quyền lái xe, kể cả khi không bị kết tội DUI.'],
+    ['alcohol', '', 'What is the only thing that sobers a person up?', ['Time', 'Black coffee', 'A cold shower', 'Fresh air'], 'Only time removes alcohol from the body. Coffee and cold showers do nothing.',
+      'Thứ duy nhất giúp một người hết say là gì?', ['Thời gian', 'Cà phê đen', 'Tắm nước lạnh', 'Không khí trong lành'], 'Chỉ có thời gian mới làm cơ thể hết cồn. Cà phê, tắm nước lạnh đều không có tác dụng.'],
+    ['alcohol', '', "Alcohol first affects a driver's:", ['Judgment', 'Hearing', 'Sense of smell', 'Appetite'], 'Judgment goes first, which is why drinkers often believe they can still drive.',
+      'Rượu ảnh hưởng trước tiên tới điều gì ở người lái?', ['Khả năng phán đoán', 'Thính giác', 'Khứu giác', 'Sự thèm ăn'], 'Rượu ảnh hưởng tới khả năng phán đoán trước tiên, nên người uống thường tưởng mình vẫn lái được.'],
+    ['alcohol', '', 'Can you be convicted of DUI for driving after taking prescription or over-the-counter medicine?', ['Yes, if the drug impairs your ability to drive', 'No, legal drugs are always allowed', 'Only if you also drank alcohol', 'Only for drivers under 21'], 'Yes. Any drug that impairs your driving can lead to a DUI, even a legal one.',
+      'Có thể bị kết tội DUI khi lái xe sau khi uống thuốc kê đơn hoặc thuốc mua ngoài quầy không?', ['Có, nếu thuốc làm giảm khả năng lái xe', 'Không, thuốc hợp pháp thì luôn được', 'Chỉ khi có uống thêm rượu', 'Chỉ áp dụng với tài xế dưới 21 tuổi'], 'Có. Thuốc kê đơn hay thuốc mua ngoài quầy làm giảm khả năng lái thì vẫn bị tính DUI.'],
+    ['alcohol', '', 'A 12-ounce beer, a 5-ounce glass of wine, and a 1.5-ounce shot of liquor contain:', ['About the same amount of alcohol', 'Very different amounts, beer is the weakest', 'No alcohol if consumed with food', 'Less alcohol if consumed slowly'], 'These three standard drinks hold about the same amount of alcohol.',
+      'Một lon bia 12 ounce, một ly rượu vang 5 ounce và một ly rượu mạnh 1,5 ounce chứa:', ['Lượng cồn gần bằng nhau', 'Lượng cồn rất khác nhau, bia nhẹ nhất', 'Không có cồn nếu uống kèm đồ ăn', 'Ít cồn hơn nếu uống chậm'], 'Một lon bia 12 oz, ly rượu vang 5 oz và ly rượu mạnh 1,5 oz có lượng cồn gần bằng nhau.'],
+    ['alcohol', '', 'Mixing alcohol with other drugs:', ['Can greatly increase the effects of both', 'Cancels out the alcohol', 'Has no effect on driving', 'Is safe with prescription drugs'], 'Alcohol combined with other drugs can multiply the effects of both.',
+      'Uống rượu chung với thuốc hoặc chất khác thì:', ['Có thể làm tác dụng của cả hai tăng mạnh', 'Làm mất tác dụng của rượu', 'Không ảnh hưởng tới việc lái xe', 'An toàn nếu là thuốc kê đơn'], 'Uống rượu chung với thuốc hoặc chất khác làm tác dụng của cả hai tăng mạnh, rất nguy hiểm.'],
+    ['alcohol', '', 'Can a driver be arrested for DUI with a BAC below 0.08%?', ['Yes, if the driver is impaired', 'No, never', 'Only in a commercial vehicle', 'Only at night'], 'Yes. If you are impaired you can be arrested for DUI at any BAC.',
+      'Tài xế có thể bị bắt vì DUI khi BAC dưới 0,08% không?', ['Có, nếu tài xế không còn đủ tỉnh táo để lái', 'Không bao giờ', 'Chỉ khi lái xe thương mại', 'Chỉ vào ban đêm'], 'Có. Dưới 0,08% mà cảnh sát thấy bạn lái không còn tỉnh táo thì vẫn bị bắt DUI.'],
+    ['alcohol', '', 'In Tennessee, a driver may not:', ['Drink alcohol or have an open container while driving', 'Carry sealed alcohol in the trunk', 'Drive a passenger who has been drinking', 'Buy alcohol on a weekday'], 'A driver may not drink or keep an open container of alcohol while operating a vehicle.',
+      'Ở Tennessee, tài xế không được:', ['Uống rượu bia hoặc có chai lon đã mở khi đang lái', 'Chở rượu còn niêm phong trong cốp', 'Chở hành khách đã uống rượu', 'Mua rượu vào ngày thường'], 'Tài xế không được uống rượu bia hay để chai, lon đã mở bên mình khi đang lái.'],
+
+    ['safe', '', 'In rain, fog, or on slippery roads, you should:', ['Slow down and increase your following distance', 'Keep your normal speed and distance', 'Follow closely to see the car ahead', 'Drive in the left lane only'], 'Bad conditions call for lower speed and more space between you and the car ahead.',
+      'Khi trời mưa, có sương mù hoặc đường trơn, bạn nên:', ['Giảm tốc và giữ khoảng cách với xe trước xa hơn', 'Giữ tốc độ và khoảng cách như bình thường', 'Bám sát để nhìn rõ xe phía trước', 'Chỉ chạy ở làn trái'], 'Thời tiết xấu: giảm tốc và giữ khoảng cách với xe trước xa hơn bình thường.'],
+    ['safe', '', 'If your vehicle starts to hydroplane, you should:', ['Ease off the gas and keep the wheel steady', 'Brake hard', 'Accelerate to regain traction', 'Turn the wheel sharply'], 'When hydroplaning, lift off the gas gently and keep the wheel straight. Do not brake hard.',
+      'Nếu xe bắt đầu trượt nước (hydroplane), bạn nên:', ['Nhả ga từ từ và giữ yên vô lăng', 'Đạp phanh gấp', 'Tăng ga để lấy lại độ bám', 'Đánh lái gấp'], 'Xe bị trượt nước: nhả ga từ từ, giữ thẳng lái, không đạp phanh gấp.'],
+    ['safe', '', 'When driving in fog, you should use:', ['Low beam headlights', 'High beam headlights', 'Parking lights only', 'Hazard lights only'], 'Use low beams in fog. High beams reflect off the fog and make it harder to see.',
+      'Khi lái xe trong sương mù, bạn nên dùng:', ['Đèn cos (chiếu gần)', 'Đèn pha (chiếu xa)', 'Chỉ đèn đỗ xe', 'Chỉ đèn khẩn cấp'], 'Sương mù dùng đèn cos. Đèn pha chiếu vào sương sẽ phản lại làm chói hơn.'],
+    ['safe', '', 'If your car begins to skid, you should:', ['Take your foot off the gas and steer in the direction you want the front of the car to go', 'Brake hard and hold the wheel straight', 'Steer the opposite way of the skid', 'Shift into neutral and brake'], 'In a skid, ease off the gas and steer where you want the front of the car to go.',
+      'Nếu xe bắt đầu bị trượt bánh, bạn nên:', ['Nhả chân ga và đánh lái về hướng bạn muốn đầu xe đi', 'Phanh gấp và giữ thẳng vô lăng', 'Đánh lái ngược hướng trượt', 'Về số N rồi phanh'], 'Xe bị trượt: nhả ga, đánh lái về hướng bạn muốn đầu xe đi, không phanh gấp.'],
+    ['safe', '', 'Before changing lanes, you should check your mirrors and:', ['Look over your shoulder to check your blind spot', 'Speed up first', 'Sound your horn', 'Turn on your hazard lights'], 'Mirrors do not show everything. Look over your shoulder to cover the blind spot.',
+      'Trước khi đổi làn, bạn nên xem gương và:', ['Ngoái qua vai để kiểm tra điểm mù', 'Tăng tốc trước', 'Bấm còi', 'Bật đèn khẩn cấp'], 'Trước khi đổi làn: xem gương rồi ngoái qua vai kiểm tra điểm mù.'],
+    ['safe', '', 'If you feel drowsy while driving, the best thing to do is:', ['Pull off the road in a safe place and rest', 'Open the window and keep going', 'Turn up the radio', 'Drink coffee and drive faster'], 'The only real fix for drowsiness is to stop somewhere safe and rest.',
+      'Nếu thấy buồn ngủ khi đang lái, tốt nhất là:', ['Tấp vào chỗ an toàn và nghỉ', 'Mở cửa sổ rồi đi tiếp', 'Vặn to radio', 'Uống cà phê rồi chạy nhanh hơn'], 'Buồn ngủ thì tấp vào chỗ an toàn nghỉ. Mở cửa sổ hay bật nhạc to không giải quyết được.'],
+    ['safe', '', 'A driver is tailgating you. You should:', ['Move to another lane or let them pass when it is safe', 'Brake suddenly to warn them', 'Speed up to get away', 'Ignore them and hold your lane'], 'Let a tailgater pass. Change lanes or make room when it is safe.',
+      'Có xe đang bám sát đuôi bạn. Bạn nên:', ['Đổi làn hoặc để họ vượt khi an toàn', 'Phanh gấp để cảnh cáo', 'Tăng tốc để bỏ xa họ', 'Mặc kệ và giữ làn'], 'Bị xe sau bám sát: đổi làn hoặc tạo điều kiện cho họ vượt, đừng phanh gấp dọa họ.'],
+    ['safe', '', 'When driving near a large truck, remember that:', ["If you cannot see the truck's mirrors, the driver cannot see you", 'Trucks can stop faster than cars', 'It is safest to follow closely behind', 'Truck drivers can see everything around them'], "Trucks have large blind spots called no-zones. No mirror in view means the driver can't see you.",
+      'Khi lái gần xe tải lớn, hãy nhớ rằng:', ['Nếu bạn không thấy gương của xe tải thì tài xế không thấy bạn', 'Xe tải dừng nhanh hơn xe con', 'Bám sát phía sau là an toàn nhất', 'Tài xế xe tải thấy được mọi thứ xung quanh'], 'Xe tải có điểm mù lớn (no-zone). Không thấy gương của nó nghĩa là tài xế không thấy bạn.'],
+    ['safe', '', 'If your brakes fail, you should first:', ['Pump the brake pedal, shift to a lower gear, and use the parking brake', 'Turn off the engine immediately', 'Steer into oncoming traffic lanes', 'Open the door and jump out'], 'Pump the pedal, shift down, and apply the parking brake gradually.',
+      'Nếu phanh bị hỏng, việc đầu tiên nên làm là:', ['Nhồi bàn đạp phanh, về số thấp và dùng phanh tay', 'Tắt máy ngay lập tức', 'Lái sang làn ngược chiều', 'Mở cửa nhảy ra'], 'Mất phanh: nhồi bàn đạp phanh nhiều lần, về số thấp, kéo phanh tay từ từ.'],
+    ['safe', '', 'When entering an interstate, you should use the acceleration lane to:', ['Match the speed of traffic before merging', 'Stop and wait for a gap', 'Drive slowly until traffic clears', 'Pass slower vehicles'], 'Use the acceleration lane to reach traffic speed, then merge. Do not stop there.',
+      'Khi vào đường interstate, bạn dùng làn tăng tốc để:', ['Lên bằng tốc độ dòng xe trước khi nhập làn', 'Dừng lại chờ khoảng trống', 'Chạy chậm tới khi vắng xe', 'Vượt các xe chậm hơn'], 'Dùng làn tăng tốc để lên bằng tốc độ dòng xe rồi mới nhập làn. Không dừng lại ở đó.'],
+    ['safe', '', 'If a tire blows out, you should:', ['Hold the wheel firmly, ease off the gas, and slow down gradually', 'Brake hard right away', 'Speed up to keep control', 'Turn sharply onto the shoulder'], 'Grip the wheel, ease off the gas, and let the car slow down before you brake gently.',
+      'Nếu xe bị nổ lốp, bạn nên:', ['Giữ chặt vô lăng, nhả ga và giảm tốc từ từ', 'Phanh gấp ngay', 'Tăng tốc để giữ lái', 'Đánh lái gấp vào lề'], 'Nổ lốp: giữ chặt vô lăng, nhả ga cho xe chậm dần, không phanh gấp.'],
+    ['safe', '', 'You missed your exit on the interstate. You should:', ['Continue to the next exit', 'Back up on the shoulder', 'Make a U-turn across the median', 'Stop and wait for traffic to clear'], 'Never back up or turn around on an interstate. Take the next exit.',
+      'Bạn lỡ lối ra trên interstate. Bạn nên:', ['Đi tiếp tới lối ra kế', 'Lùi xe trên lề', 'Quay đầu qua dải phân cách', 'Dừng lại chờ vắng xe'], 'Lỡ lối ra thì đi tiếp tới lối ra kế. Tuyệt đối không lùi xe hay quay đầu trên interstate.'],
+    ['safe', '', 'Roads are most slippery:', ['During the first few minutes of rain', 'After it has rained for several hours', 'On dry sunny days', 'Only when it snows'], 'Early rain mixes with oil and dust on the road, so the first minutes are the slickest.',
+      'Đường trơn nhất vào lúc:', ['Vài phút đầu khi trời mới mưa', 'Sau khi mưa được vài tiếng', 'Ngày nắng khô ráo', 'Chỉ khi có tuyết'], 'Đường trơn nhất lúc mới mưa vài phút đầu, vì nước trộn với dầu và bụi trên mặt đường.'],
+
+    // ---------- added set ----------
+    ['signs', 'donotenter', 'A red circle with a white horizontal bar means:', ['Do not enter', 'Stop, then proceed', 'No parking', 'Road work ahead'], 'This is the DO NOT ENTER sign. Traffic is coming toward you on that road or ramp.',
+      'Biển tròn đỏ có vạch ngang trắng nghĩa là:', ['Cấm vào', 'Dừng rồi đi tiếp', 'Cấm đậu xe', 'Phía trước đang sửa đường'], 'Đây là biển DO NOT ENTER (cấm vào). Xe đang chạy ngược về phía bạn trên đường hoặc lối đó.'],
+    ['signs', 'smv', 'An orange triangle with a red border on the back of a vehicle means:', ['A slow-moving vehicle', 'A vehicle carrying explosives', 'An emergency vehicle', 'A student driver'], 'The orange triangle marks a slow-moving vehicle such as farm equipment. Slow down early.',
+      'Hình tam giác cam viền đỏ gắn sau xe nghĩa là:', ['Xe chạy chậm', 'Xe chở chất nổ', 'Xe ưu tiên', 'Xe tập lái'], 'Tam giác cam viền đỏ là dấu hiệu xe chạy chậm, ví dụ máy nông nghiệp. Giảm tốc từ sớm.'],
+    ['signs', 'crossbuck', 'A white X-shaped sign at a railroad crossing means:', ['Yield to trains', 'Trains must stop for cars', 'No trains use this track', 'Stop only at night'], 'The crossbuck works like a yield sign: slow down, look, listen, and give way to any train.',
+      'Biển trắng hình chữ X ở chỗ giao với đường ray nghĩa là:', ['Nhường đường cho tàu', 'Tàu phải dừng cho xe', 'Đường ray này không có tàu chạy', 'Chỉ dừng vào ban đêm'], 'Biển chữ X trắng có tác dụng như biển nhường đường: giảm tốc, nhìn, nghe và nhường tàu.'],
+    ['signs', 'green', 'Green signs on the highway give:', ['Directions and distances', 'Warnings about hazards', 'Speed limits', 'Work zone information'], 'Green signs are guide signs: exits, directions and distances.',
+      'Biển màu xanh lá trên đường cao tốc cho biết:', ['Hướng đi và khoảng cách', 'Cảnh báo nguy hiểm', 'Giới hạn tốc độ', 'Thông tin khu thi công'], 'Biển xanh lá là biển chỉ dẫn: lối ra, hướng đi và khoảng cách.'],
+    ['signs', 'blue', 'Blue signs tell drivers about:', ['Services such as gas, food, lodging and hospitals', 'Construction ahead', 'School zones', 'No passing zones'], 'Blue signs point to motorist services.',
+      'Biển màu xanh dương cho tài xế biết về:', ['Dịch vụ như xăng, đồ ăn, chỗ nghỉ và bệnh viện', 'Công trình phía trước', 'Khu trường học', 'Đoạn cấm vượt'], 'Biển xanh dương chỉ các dịch vụ cho tài xế.'],
+    ['signs', 'brown', 'Brown signs point to:', ['Parks, recreation and cultural sites', 'Detours', 'Hospitals', 'Truck routes'], 'Brown signs mark recreation areas and places of cultural interest.',
+      'Biển màu nâu chỉ tới:', ['Công viên, khu giải trí và di tích văn hóa', 'Đường vòng', 'Bệnh viện', 'Tuyến đường xe tải'], 'Biển nâu đánh dấu khu giải trí và điểm văn hóa, du lịch.'],
+    ['signs', '', 'On a traffic sign, the color red means:', ['Stop, yield, or something is prohibited', 'General warning', 'Guide information', 'Construction'], 'Red is used for stop, yield and prohibition signs.',
+      'Trên biển báo giao thông, màu đỏ nghĩa là:', ['Dừng, nhường đường hoặc điều gì đó bị cấm', 'Cảnh báo chung', 'Thông tin chỉ dẫn', 'Thi công'], 'Màu đỏ dùng cho biển dừng, nhường đường và biển cấm.'],
+    ['signs', 'slash', 'A red circle with a red slash over a symbol means:', ['The action shown is not allowed', 'The action shown is required', 'A warning that the action is risky', 'The rule applies only at night'], 'Circle and slash means NO: the thing pictured is prohibited.',
+      'Vòng tròn đỏ có gạch chéo đỏ đè lên một ký hiệu nghĩa là:', ['Hành động trong hình bị cấm', 'Hành động trong hình là bắt buộc', 'Cảnh báo hành động đó nguy hiểm', 'Quy định chỉ áp dụng ban đêm'], 'Vòng tròn gạch chéo nghĩa là CẤM: điều được vẽ trong hình không được làm.'],
+    ['signs', 'solidside', 'A solid yellow line on your side of the center line means:', ['You may not pass', 'You may pass when the way is clear', 'The road becomes one-way', 'The lane is for left turns only'], 'A solid yellow line on your side means no passing for your direction.',
+      'Vạch vàng liền nằm ở phía bạn của vạch giữa đường nghĩa là:', ['Bạn không được vượt', 'Bạn được vượt khi đường trống', 'Đường chuyển thành một chiều', 'Làn chỉ dành cho rẽ trái'], 'Vạch vàng liền ở phía bạn: chiều của bạn không được vượt.'],
+    ['signs', 'brokenyellow', 'A broken yellow center line means:', ['Passing is allowed when it is safe', 'Passing is never allowed', 'Lanes move in the same direction', 'The road is closed ahead'], 'Broken yellow separates opposite directions and allows passing when the way is clear.',
+      'Vạch vàng đứt ở giữa đường nghĩa là:', ['Được vượt khi an toàn', 'Không bao giờ được vượt', 'Các làn đi cùng chiều', 'Đường phía trước bị đóng'], 'Vạch vàng đứt chia hai chiều ngược nhau và cho phép vượt khi đường trống.'],
+    ['signs', 'solidwhite', 'A solid white line between lanes means:', ['Stay in your lane unless a special situation requires a change', 'You may change lanes freely', 'Traffic moves in opposite directions', 'The lane is reserved for buses'], 'Solid white lines discourage lane changes. Stay in your lane.',
+      'Vạch trắng liền giữa các làn nghĩa là:', ['Giữ nguyên làn trừ khi có tình huống đặc biệt', 'Được đổi làn thoải mái', 'Các làn đi ngược chiều nhau', 'Làn dành riêng cho xe buýt'], 'Vạch trắng liền: hạn chế đổi làn, nên giữ làn của mình.'],
+    ['signs', 'stopline', 'A wide white line painted across your lane at an intersection is:', ['A stop line showing where to stop', 'A crosswalk for bicycles', 'A marker for the speed limit', 'A no passing line'], 'Stop before the stop line when you face a stop sign or red light.',
+      'Vạch trắng rộng kẻ ngang làn của bạn ở ngã tư là:', ['Vạch dừng, cho biết chỗ phải dừng', 'Vạch qua đường cho xe đạp', 'Vạch đánh dấu giới hạn tốc độ', 'Vạch cấm vượt'], 'Gặp biển STOP hoặc đèn đỏ thì dừng trước vạch dừng.'],
+    ['signs', 'dark', 'A traffic signal is completely dark and not working. You should:', ['Treat the intersection as a four-way stop', 'Drive through without slowing', 'Wait until it is repaired', 'Yield only to larger vehicles'], 'A dead signal is handled like a four-way stop: everyone stops, then takes turns.',
+      'Đèn giao thông bị tắt hẳn, không hoạt động. Bạn nên:', ['Xử lý ngã tư như ngã tư bốn biển dừng', 'Chạy qua không cần giảm tốc', 'Chờ tới khi đèn được sửa', 'Chỉ nhường xe lớn hơn'], 'Đèn hỏng thì xử lý như ngã tư bốn biển STOP: ai cũng dừng rồi lần lượt đi.'],
+    ['signs', 'yellowarrow', 'A flashing yellow arrow means:', ['You may turn after yielding to oncoming traffic and pedestrians', 'You have a protected turn', 'You must stop and wait', 'The turn lane is closed'], 'Flashing yellow arrow: the turn is allowed but not protected. Yield first.',
+      'Mũi tên vàng nhấp nháy nghĩa là:', ['Được rẽ sau khi nhường xe ngược chiều và người đi bộ', 'Bạn được rẽ có bảo vệ', 'Phải dừng và chờ', 'Làn rẽ bị đóng'], 'Mũi tên vàng nháy: được rẽ nhưng không được ưu tiên, phải nhường trước.'],
+    ['signs', 'centerlane', 'A center lane marked on both sides by a solid and a broken yellow line is used for:', ['Left turns by traffic from either direction', 'Passing slower vehicles', 'Parking', 'Through traffic'], 'This is a two-way left turn lane. Use it only to turn left, never to pass or travel.',
+      'Làn giữa có vạch vàng liền kèm vạch vàng đứt ở cả hai bên dùng để:', ['Rẽ trái, cho xe từ cả hai chiều', 'Vượt xe chậm hơn', 'Đậu xe', 'Xe đi thẳng'], 'Đây là làn rẽ trái dùng chung hai chiều. Chỉ dùng để rẽ trái, không dùng để vượt hay chạy thẳng.'],
+    ['signs', 'steadyred', 'At a steady red light you must:', ['Stop before the stop line or crosswalk and wait for green', 'Slow down and go if it is clear', 'Stop only if a police officer is present', 'Stop in the middle of the intersection'], 'Stop before the line or crosswalk and stay stopped until the light turns green, unless you are making a permitted turn on red.',
+      'Gặp đèn đỏ sáng liên tục, bạn phải:', ['Dừng trước vạch dừng hoặc vạch qua đường và chờ đèn xanh', 'Giảm tốc rồi đi nếu trống', 'Chỉ dừng khi có cảnh sát', 'Dừng ở giữa ngã tư'], 'Dừng trước vạch và chờ tới khi đèn xanh, trừ khi bạn rẽ khi đèn đỏ ở chỗ được phép.'],
+
+    ['rules', '', 'A police officer is directing traffic and signals you to go, but the light is red. You should:', ['Follow the officer', 'Wait for the green light', 'Stop and ask the officer', 'Turn around'], "An officer's directions override signs and signals.",
+      'Cảnh sát đang điều khiển giao thông ra hiệu cho bạn đi, nhưng đèn đang đỏ. Bạn nên:', ['Làm theo cảnh sát', 'Chờ đèn xanh', 'Dừng lại hỏi cảnh sát', 'Quay đầu'], 'Hiệu lệnh của cảnh sát có hiệu lực cao hơn biển báo và đèn.'],
+    ['rules', '', 'You are turning left on a green light with no arrow. You must:', ['Yield to oncoming traffic and pedestrians', 'Turn right away because green means go', 'Wait for the light to turn yellow', 'Honk and turn'], 'A plain green light does not protect a left turn. Yield to oncoming vehicles and people crossing.',
+      'Bạn rẽ trái khi đèn xanh không có mũi tên. Bạn phải:', ['Nhường xe ngược chiều và người đi bộ', 'Rẽ ngay vì đèn xanh là được đi', 'Chờ đèn chuyển vàng', 'Bấm còi rồi rẽ'], 'Đèn xanh thường không ưu tiên cho rẽ trái. Phải nhường xe ngược chiều và người qua đường.'],
+    ['rules', '', 'When entering a street from a driveway or alley, you must:', ['Stop and yield to pedestrians and traffic on the street', 'Honk and pull out', 'Yield only to trucks', 'Enter quickly before traffic arrives'], 'Stop before the sidewalk and yield to everyone already on the street.',
+      'Khi từ lối nhà hoặc hẻm ra đường, bạn phải:', ['Dừng và nhường người đi bộ, xe trên đường', 'Bấm còi rồi chạy ra', 'Chỉ nhường xe tải', 'Chạy ra nhanh trước khi xe tới'], 'Dừng trước vỉa hè và nhường tất cả những ai đang ở trên đường.'],
+    ['rules', '', 'When entering a roundabout, you must:', ['Yield to traffic already in the circle', 'Stop in the circle to let others in', 'Enter first because you are on the right', 'Drive clockwise'], 'Vehicles already circulating have the right-of-way.',
+      'Khi vào vòng xuyến, bạn phải:', ['Nhường xe đang ở trong vòng', 'Dừng trong vòng để xe khác vào', 'Vào trước vì bạn ở bên phải', 'Chạy theo chiều kim đồng hồ'], 'Xe đang chạy trong vòng xuyến được ưu tiên.'],
+    ['rules', '', 'Traffic in a roundabout moves:', ['Counterclockwise', 'Clockwise', 'In both directions', 'In whichever direction is shorter'], 'Always travel counterclockwise, to the right of the center island.',
+      'Xe trong vòng xuyến chạy theo chiều:', ['Ngược chiều kim đồng hồ', 'Cùng chiều kim đồng hồ', 'Cả hai chiều', 'Chiều nào gần hơn'], 'Luôn chạy ngược chiều kim đồng hồ, bên phải đảo giữa.'],
+    ['rules', '', 'You should not pass another vehicle:', ['On a hill or curve where you cannot see far enough ahead', 'On a straight road with a broken yellow line', 'When the vehicle ahead is very slow', 'During the daytime'], 'Never pass where your view is blocked, such as hills, curves and intersections.',
+      'Không nên vượt xe khác:', ['Trên dốc hoặc khúc cua, nơi không nhìn đủ xa phía trước', 'Trên đường thẳng có vạch vàng đứt', 'Khi xe trước chạy rất chậm', 'Vào ban ngày'], 'Không vượt ở chỗ tầm nhìn bị che như dốc, khúc cua, ngã tư.'],
+    ['rules', '', 'A school bus stops with red lights flashing on the opposite side of a highway divided by a median. You:', ['Do not have to stop, but should watch for children', 'Must stop until the lights go off', 'Must turn around', 'Must honk before passing'], 'On a divided highway with a median, only traffic behind the bus must stop.',
+      'Xe buýt trường dừng và nháy đèn đỏ ở phía bên kia của đường có dải phân cách. Bạn:', ['Không bắt buộc dừng, nhưng nên để ý trẻ em', 'Phải dừng tới khi đèn tắt', 'Phải quay đầu', 'Phải bấm còi trước khi đi qua'], 'Đường có dải phân cách ở giữa thì chỉ xe đi phía sau xe buýt mới phải dừng.'],
+    ['rules', '', 'When parking uphill next to a curb, turn your front wheels:', ['Away from the curb', 'Toward the curb', 'Straight ahead', 'Either way'], 'Uphill with a curb: wheels away from the curb so the car rolls back into it.',
+      'Khi đậu xe hướng lên dốc cạnh lề có bó vỉa, hãy bẻ bánh trước:', ['Ra xa lề', 'Vào phía lề', 'Thẳng', 'Hướng nào cũng được'], 'Lên dốc có bó vỉa: bẻ bánh ra xa lề để nếu xe trôi lùi thì bánh tì vào lề.'],
+    ['rules', '', 'When parking downhill, turn your front wheels:', ['Toward the curb or the side of the road', 'Away from the curb', 'Straight ahead', 'Toward the center line'], 'Downhill: wheels toward the curb so the car rolls into it and stops.',
+      'Khi đậu xe hướng xuống dốc, hãy bẻ bánh trước:', ['Vào phía lề hoặc mép đường', 'Ra xa lề', 'Thẳng', 'Về phía vạch giữa đường'], 'Xuống dốc: bẻ bánh vào lề để nếu xe trôi thì bánh tì vào lề và dừng lại.'],
+    ['rules', '', 'In Tennessee, when your windshield wipers are on because of rain, you must also:', ['Turn on your headlights', 'Turn on your hazard lights', 'Drive in the left lane', 'Use high beams'], 'Wipers on means headlights on. It helps other drivers see you.',
+      'Ở Tennessee, khi bật cần gạt nước vì trời mưa, bạn cũng phải:', ['Bật đèn pha', 'Bật đèn khẩn cấp', 'Chạy ở làn trái', 'Dùng đèn chiếu xa'], 'Bật gạt nước thì phải bật đèn, để xe khác thấy bạn.'],
+    ['rules', '', 'If you change your address, you must notify the Department of Safety within:', ['10 days', '30 days', '60 days', '6 months'], 'Tennessee law gives you 10 days to report a change of address.',
+      'Nếu đổi địa chỉ, bạn phải báo cho Department of Safety trong vòng:', ['10 ngày', '30 ngày', '60 ngày', '6 tháng'], 'Luật Tennessee cho 10 ngày để báo đổi địa chỉ.'],
+    ['rules', '', 'A new Tennessee resident with a license from another state must get a Tennessee license within:', ['30 days', '10 days', '90 days', '1 year'], 'New residents have 30 days after establishing residency.',
+      'Người mới tới Tennessee có bằng lái của bang khác phải đổi sang bằng Tennessee trong vòng:', ['30 ngày', '10 ngày', '90 ngày', '1 năm'], 'Người mới tới có 30 ngày kể từ khi trở thành cư dân.'],
+    ['rules', '', 'An adult driver who collects how many points in 12 months gets a notice of proposed suspension?', ['12 points', '6 points', '8 points', '20 points'], 'Twelve or more points within 12 months triggers a proposed suspension.',
+      'Tài xế người lớn bị bao nhiêu điểm phạt trong 12 tháng thì nhận thông báo đề nghị treo bằng?', ['12 điểm', '6 điểm', '8 điểm', '20 điểm'], 'Từ 12 điểm trở lên trong 12 tháng là bị đề nghị treo bằng.'],
+    ['rules', '', 'If you are involved in a crash, you must:', ['Stop, help anyone injured, and exchange information', 'Leave if the damage looks small', 'Wait at home for the police to call', 'Move on unless someone asks you to stop'], 'Stop at the scene, give aid, and share your name, license and insurance details.',
+      'Nếu liên quan tới một vụ tai nạn, bạn phải:', ['Dừng lại, giúp người bị thương và trao đổi thông tin', 'Rời đi nếu thiệt hại có vẻ nhỏ', 'Về nhà chờ cảnh sát gọi', 'Đi tiếp trừ khi có người bảo dừng'], 'Dừng tại hiện trường, giúp người bị nạn, đưa tên, bằng lái và thông tin bảo hiểm.'],
+    ['rules', '', 'You are driving slowly on a two-lane road and five or more vehicles are lined up behind you. You should:', ['Pull off where it is safe and let them pass', 'Speed up above the limit', 'Keep going, they must wait', 'Drive on the shoulder'], 'Tennessee expects a slow driver holding up five or more vehicles to pull off and let them by.',
+      'Bạn chạy chậm trên đường hai làn và có từ năm xe trở lên nối đuôi phía sau. Bạn nên:', ['Tấp vào chỗ an toàn để họ vượt', 'Tăng tốc vượt quá giới hạn', 'Cứ chạy, họ phải chờ', 'Chạy trên lề'], 'Ở Tennessee, xe chạy chậm làm kẹt từ năm xe trở lên thì nên tấp vào cho họ vượt.'],
+    ['rules', '', 'Under Tennessee law, who in the front seat must wear a seat belt?', ['The driver and all front seat passengers', 'Only the driver', 'Only passengers under 18', 'Nobody, it is optional'], 'The driver and every front seat passenger must be buckled.',
+      'Theo luật Tennessee, ai ngồi hàng ghế trước phải thắt dây an toàn?', ['Tài xế và tất cả hành khách ghế trước', 'Chỉ tài xế', 'Chỉ hành khách dưới 18 tuổi', 'Không ai cả, tùy ý'], 'Tài xế và mọi người ngồi ghế trước đều phải thắt dây.'],
+    ['rules', '', 'A child under 1 year old, or weighing 20 pounds or less, must ride in:', ['A rear-facing child seat', 'A forward-facing child seat', 'A booster seat', 'A regular seat belt'], 'Under age 1 or 20 pounds or less: rear-facing seat, in the back seat if there is one.',
+      'Trẻ dưới 1 tuổi, hoặc nặng từ 20 pound trở xuống, phải ngồi:', ['Ghế trẻ em quay mặt về sau', 'Ghế trẻ em quay mặt về trước', 'Ghế nâng (booster)', 'Dây an toàn thường'], 'Dưới 1 tuổi hoặc từ 20 pound trở xuống: ghế quay mặt về sau, đặt ở hàng ghế sau nếu có.'],
+    ['rules', '', 'Children age 4 through 8 who are shorter than 4 feet 9 inches must use:', ['A booster seat', 'A rear-facing seat', 'A seat belt only', 'No restraint in the back seat'], 'Ages 4 to 8 and under 4 feet 9 inches: belt-positioning booster seat.',
+      'Trẻ từ 4 tới 8 tuổi và thấp hơn 4 feet 9 inch phải dùng:', ['Ghế nâng (booster)', 'Ghế quay mặt về sau', 'Chỉ cần dây an toàn', 'Ngồi ghế sau thì không cần gì'], 'Từ 4 tới 8 tuổi và thấp hơn 4 feet 9 inch (khoảng 1,45 mét): dùng ghế nâng.'],
+    ['rules', '', 'You may not park within how many feet of a stop sign or traffic signal?', ['30 feet', '10 feet', '15 feet', '100 feet'], 'Keep 30 feet clear of stop signs and traffic signals so others can see them.',
+      'Không được đậu xe trong vòng bao nhiêu feet tính từ biển STOP hoặc đèn giao thông?', ['30 feet', '10 feet', '15 feet', '100 feet'], 'Phải cách biển STOP và đèn giao thông 30 feet để người khác còn thấy chúng.'],
+    ['rules', '', 'A driver with a learner permit must be accompanied by:', ['A licensed driver age 21 or older in the front seat', 'Any licensed driver in the car', 'A parent in the back seat', 'Nobody during daytime'], 'Permit holders need a licensed driver who is at least 21 sitting in the front seat.',
+      'Người lái bằng learner permit phải có đi cùng:', ['Người có bằng lái từ 21 tuổi trở lên ngồi ghế trước', 'Bất kỳ ai có bằng lái ở trong xe', 'Cha mẹ ngồi ghế sau', 'Ban ngày thì không cần ai'], 'Người có permit phải có người từ 21 tuổi, có bằng lái, ngồi ở ghế trước.'],
+    ['rules', '', 'A person with a white cane or a guide dog is crossing the street. You must:', ['Stop and give them the right-of-way', 'Honk to let them know you are there', 'Drive around them slowly', 'Proceed if your light is green'], 'A white cane or guide dog means the person is blind. Always stop and let them cross.',
+      'Một người cầm gậy trắng hoặc dắt chó dẫn đường đang qua đường. Bạn phải:', ['Dừng lại và nhường họ', 'Bấm còi cho họ biết có xe', 'Lái chậm vòng qua họ', 'Cứ đi nếu đèn của bạn xanh'], 'Gậy trắng hoặc chó dẫn đường nghĩa là người khiếm thị. Luôn dừng lại cho họ qua.'],
+
+    ['alcohol', '', 'For a driver operating a commercial vehicle, the BAC limit is:', ['0.04%', '0.08%', '0.02%', '0.10%'], 'Commercial drivers are held to 0.04%.',
+      'Với tài xế lái xe thương mại, giới hạn BAC là:', ['0,04%', '0,08%', '0,02%', '0,10%'], 'Tài xế xe thương mại bị giới hạn ở mức 0,04%.'],
+    ['alcohol', '', 'Your blood alcohol level depends on:', ['How much you drank, how fast, and your body weight', 'Only the type of drink', 'Only how tired you are', 'How strong you feel'], 'Amount, time and body weight drive BAC. The type of drink does not change it.',
+      'Nồng độ cồn trong máu phụ thuộc vào:', ['Uống bao nhiêu, uống nhanh cỡ nào và cân nặng', 'Chỉ loại đồ uống', 'Chỉ mức độ mệt', 'Bạn cảm thấy khỏe tới đâu'], 'Lượng uống, thời gian và cân nặng quyết định BAC. Loại đồ uống không làm thay đổi điều đó.'],
+    ['alcohol', '', 'Alcohol is a depressant, which means it:', ['Slows your reflexes and reaction time', 'Makes you more alert', 'Improves night vision', 'Has no effect in small amounts'], 'Alcohol slows the brain and body, so you react later and less accurately.',
+      'Rượu là chất ức chế, nghĩa là nó:', ['Làm chậm phản xạ và thời gian phản ứng', 'Làm bạn tỉnh táo hơn', 'Giúp nhìn rõ hơn ban đêm', 'Uống ít thì không ảnh hưởng'], 'Rượu làm não và cơ thể chậm lại, nên bạn phản ứng trễ và kém chính xác hơn.'],
+    ['alcohol', '', 'The best way to avoid a DUI is to:', ['Not drive at all after drinking', 'Drink coffee before driving', 'Drive slowly on back roads', 'Wait 15 minutes after your last drink'], 'If you drink, do not drive. Use a designated driver, a ride service or stay where you are.',
+      'Cách tốt nhất để tránh DUI là:', ['Đã uống thì không lái xe', 'Uống cà phê trước khi lái', 'Lái chậm trên đường vắng', 'Chờ 15 phút sau ly cuối'], 'Đã uống thì đừng lái. Nhờ người không uống chở, gọi xe hoặc ở lại.'],
+    ['alcohol', '', 'A driver under 21 convicted of driving with a BAC of 0.02% or more can lose their license for:', ['One year', 'One week', '30 days', '90 days'], 'Underage impaired driving brings a one-year license suspension along with a fine.',
+      'Tài xế dưới 21 tuổi bị kết tội lái xe với BAC từ 0,02% trở lên có thể bị treo bằng:', ['Một năm', 'Một tuần', '30 ngày', '90 ngày'], 'Dưới 21 tuổi lái xe khi có cồn bị treo bằng một năm, kèm tiền phạt.'],
+    ['alcohol', '', 'Marijuana affects driving by:', ['Slowing reaction time and distorting your sense of time and distance', 'Making you a more careful driver', 'Improving concentration', 'Having no effect after one hour'], 'Marijuana slows reactions and makes it harder to judge distance and speed.',
+      'Cần sa ảnh hưởng tới việc lái xe bằng cách:', ['Làm chậm phản ứng và sai lệch cảm nhận về thời gian, khoảng cách', 'Làm bạn lái cẩn thận hơn', 'Tăng sự tập trung', 'Hết tác dụng sau một tiếng'], 'Cần sa làm phản ứng chậm đi và khó ước lượng khoảng cách, tốc độ.'],
+    ['alcohol', '', 'Before driving while taking a new medicine, you should:', ['Read the label or ask a doctor or pharmacist how it affects driving', 'Assume it is safe because it is legal', 'Take a double dose to be sure', 'Drink coffee with it'], 'Many medicines cause drowsiness. Check the label or ask before you drive.',
+      'Trước khi lái xe lúc đang dùng một loại thuốc mới, bạn nên:', ['Đọc nhãn hoặc hỏi bác sĩ, dược sĩ xem thuốc ảnh hưởng thế nào tới việc lái', 'Cho là an toàn vì thuốc hợp pháp', 'Uống gấp đôi cho chắc', 'Uống kèm cà phê'], 'Nhiều loại thuốc gây buồn ngủ. Đọc nhãn hoặc hỏi trước khi lái.'],
+    ['alcohol', '', 'A first DUI conviction in Tennessee can bring:', ['Jail time, a fine, and loss of your license', 'Only a warning letter', 'Only a small fine', 'Only extra points'], 'Even a first DUI carries jail time, fines and a revoked license.',
+      'Bị kết tội DUI lần đầu ở Tennessee có thể dẫn tới:', ['Ngồi tù, bị phạt tiền và mất bằng lái', 'Chỉ một thư cảnh cáo', 'Chỉ phạt một khoản nhỏ', 'Chỉ bị cộng điểm phạt'], 'DUI lần đầu cũng đã có án tù, tiền phạt và bị thu hồi bằng.'],
+    ['alcohol', '', 'How many drinks does it take to affect your driving?', ['Even one drink can affect it', 'At least three', 'At least five', 'Only drinks of hard liquor count'], 'Judgment and reaction begin to change with the first drink.',
+      'Uống bao nhiêu ly thì ảnh hưởng tới việc lái xe?', ['Chỉ một ly cũng có thể ảnh hưởng', 'Ít nhất ba ly', 'Ít nhất năm ly', 'Chỉ rượu mạnh mới tính'], 'Khả năng phán đoán và phản ứng bắt đầu thay đổi ngay từ ly đầu tiên.'],
+    ['alcohol', '', 'Your friend has been drinking and wants to drive home. You should:', ['Stop them from driving and arrange another ride', 'Let them drive if they feel fine', 'Give them coffee and send them off', 'Follow them in your car'], 'Do not let an impaired person drive. Offer a ride, call one, or let them stay.',
+      'Bạn của bạn đã uống rượu và muốn lái xe về. Bạn nên:', ['Ngăn họ lái và tìm cách khác đưa họ về', 'Để họ lái nếu họ thấy ổn', 'Cho uống cà phê rồi để họ đi', 'Lái xe theo sau họ'], 'Đừng để người đã uống lái xe. Chở họ, gọi xe hoặc cho họ ở lại.'],
+    ['alcohol', '', 'Eating food before or while drinking:', ['Slows alcohol absorption but does not prevent impairment', 'Keeps you completely sober', 'Removes alcohol from your blood', 'Makes it legal to drive'], 'Food slows how fast alcohol reaches the blood. It does not stop you from becoming impaired.',
+      'Ăn trước hoặc trong khi uống rượu thì:', ['Làm cồn ngấm chậm hơn nhưng không ngăn được say', 'Giữ bạn hoàn toàn tỉnh táo', 'Loại cồn ra khỏi máu', 'Làm việc lái xe thành hợp pháp'], 'Đồ ăn làm cồn vào máu chậm hơn, nhưng không ngăn được việc bạn bị ảnh hưởng.'],
+
+    ['safe', '', 'To keep a safe following distance in normal conditions, the Tennessee manual teaches the:', ['Two-second rule', 'One car length rule', 'Half-second rule', 'Ten-foot rule'], 'Pick a fixed object. When the car ahead passes it, you should reach it no sooner than two seconds later. Add more time in bad conditions.',
+      'Để giữ khoảng cách an toàn trong điều kiện bình thường, sách Tennessee dạy:', ['Quy tắc hai giây', 'Quy tắc một thân xe', 'Quy tắc nửa giây', 'Quy tắc mười feet'], 'Chọn một vật cố định. Xe trước đi qua nó thì ít nhất hai giây sau bạn mới tới. Trời xấu thì cộng thêm thời gian.'],
+    ['safe', '', 'When driving at night you should be able to stop:', ['Within the distance lit by your headlights', 'Within twice the distance you can see', 'Only after passing the next intersection', 'Within 500 feet no matter what'], 'Do not overdrive your headlights. If you cannot stop inside the lit area, you are going too fast.',
+      'Khi lái xe ban đêm, bạn phải dừng được:', ['Trong khoảng đường đèn xe chiếu tới', 'Trong khoảng gấp đôi tầm nhìn', 'Chỉ sau khi qua ngã tư kế tiếp', 'Trong 500 feet bất kể thế nào'], 'Đừng chạy nhanh hơn tầm đèn. Không dừng kịp trong vùng đèn chiếu nghĩa là bạn đang chạy quá nhanh.'],
+    ['safe', '', 'An oncoming driver does not dim their high beams. You should:', ['Look toward the right edge of your lane', 'Stare at the lights to judge distance', 'Flash your high beams and keep them on', 'Close one eye'], 'Glance toward the right edge line to avoid being blinded, and slow down.',
+      'Xe ngược chiều không hạ đèn pha. Bạn nên:', ['Nhìn về mép phải của làn mình', 'Nhìn thẳng vào đèn để ước lượng khoảng cách', 'Bật đèn pha lại và để nguyên', 'Nhắm một mắt'], 'Liếc về vạch mép phải để khỏi bị chói, và giảm tốc.'],
+    ['safe', '', 'A motorcycle on the road is entitled to:', ['The full width of a lane', 'Half of a lane', 'Only the shoulder', 'The lane only when no cars need it'], 'Motorcycles get a full lane. Never share the lane beside one.',
+      'Xe mô tô trên đường được quyền dùng:', ['Toàn bộ chiều rộng một làn', 'Một nửa làn', 'Chỉ phần lề', 'Làn đường chỉ khi không có ô tô cần'], 'Mô tô được dùng trọn một làn. Không chạy song song chung làn với nó.'],
+    ['safe', '', 'In a work zone you should:', ['Slow down, stay alert, and follow flaggers and signs', 'Keep your normal speed', 'Change lanes as often as possible', 'Follow the car ahead closely'], 'Work zones have workers, narrow lanes and sudden stops. Slow down and obey the flagger.',
+      'Trong khu vực thi công, bạn nên:', ['Giảm tốc, tập trung và làm theo người cầm cờ, biển báo', 'Giữ tốc độ bình thường', 'Đổi làn càng nhiều càng tốt', 'Bám sát xe trước'], 'Khu thi công có công nhân, làn hẹp và xe dừng đột ngột. Giảm tốc và nghe theo người điều khiển.'],
+    ['safe', '', 'Texting while driving is dangerous mainly because it:', ['Takes your eyes, hands and mind off driving', 'Uses up your phone battery', 'Makes the car slower', 'Is only risky at night'], 'Texting combines all three kinds of distraction at once.',
+      'Nhắn tin khi lái xe nguy hiểm chủ yếu vì nó:', ['Lấy mất mắt, tay và sự chú ý của bạn khỏi việc lái', 'Làm hao pin điện thoại', 'Làm xe chạy chậm lại', 'Chỉ nguy hiểm ban đêm'], 'Nhắn tin gộp cả ba kiểu mất tập trung cùng lúc.'],
+    ['safe', '', 'Your right wheels drop off the edge of the pavement. You should:', ['Ease off the gas, hold the wheel firmly, and steer back gently once you have slowed', 'Jerk the wheel left immediately', 'Brake as hard as you can', 'Speed up to climb back on'], 'Stay calm, slow down, then return to the road with a small, gentle turn.',
+      'Hai bánh bên phải rơi khỏi mép đường nhựa. Bạn nên:', ['Nhả ga, giữ chắc vô lăng, khi đã chậm thì nhẹ nhàng lái trở lại', 'Giật lái sang trái ngay', 'Phanh hết sức', 'Tăng tốc để leo lại lên đường'], 'Bình tĩnh, giảm tốc, rồi đánh lái nhẹ để trở lại mặt đường.'],
+    ['safe', '', 'Your gas pedal sticks while you are driving. You should:', ['Shift to neutral, brake, and pull off the road', 'Turn the key to lock', 'Pump the gas pedal quickly', 'Keep driving until it frees itself'], 'Neutral cuts power to the wheels so you can brake and steer to safety.',
+      'Chân ga bị kẹt khi đang lái. Bạn nên:', ['Về số N, phanh và tấp vào lề', 'Vặn chìa về vị trí khóa', 'Nhồi chân ga liên tục', 'Cứ chạy tới khi nó tự nhả'], 'Về số N để cắt lực kéo ra bánh xe, rồi phanh và lái vào chỗ an toàn.'],
+    ['safe', '', 'Your car stalls on railroad tracks and a train is coming. You should:', ['Get everyone out and move far away from the tracks', 'Stay inside and call for help', 'Try to push the car off', 'Wave at the train to stop'], 'Leave the vehicle at once and get well clear of the tracks. A train cannot stop in time.',
+      'Xe chết máy trên đường ray và tàu đang tới. Bạn nên:', ['Cho mọi người ra khỏi xe và chạy xa đường ray', 'Ngồi trong xe gọi cứu hộ', 'Cố đẩy xe ra', 'Vẫy tay cho tàu dừng'], 'Rời xe ngay và tránh thật xa đường ray. Tàu không thể dừng kịp.'],
+    ['safe', '', 'A vehicle is coming toward you in your lane. You should:', ['Slow down, pull to the right, and sound your horn', 'Move into the left lane', 'Stop in your lane and wait', 'Flash your lights and hold your position'], 'Brake, move right, and warn the other driver. Never swerve left into oncoming lanes.',
+      'Một xe đang chạy ngược về phía bạn trong làn của bạn. Bạn nên:', ['Giảm tốc, nép sang phải và bấm còi', 'Lấn sang làn trái', 'Dừng trong làn và chờ', 'Nháy đèn và giữ nguyên vị trí'], 'Phanh, nép phải và báo cho xe kia. Không bao giờ né sang trái vào làn ngược chiều.'],
+    ['safe', '', 'The road ahead is covered with flood water. You should:', ['Turn around and find another route', 'Drive through quickly', 'Follow the car in front through the water', 'Drive in the middle where it is shallow'], 'You cannot judge depth or current. Turn around.',
+      'Đường phía trước bị ngập nước. Bạn nên:', ['Quay lại và tìm đường khác', 'Chạy nhanh qua', 'Đi theo xe trước lội qua', 'Chạy giữa đường vì chỗ đó cạn'], 'Bạn không biết được nước sâu hay chảy mạnh cỡ nào. Hãy quay lại.'],
+    ['safe', '', 'A deer runs onto the road in front of you. The safest reaction is usually to:', ['Brake firmly and stay in your lane', 'Swerve sharply into the other lane', 'Speed up to get past it', 'Turn off your headlights'], 'Swerving causes worse crashes. Brake and hold your lane.',
+      'Một con hươu chạy ra đường trước mặt bạn. Phản ứng an toàn nhất thường là:', ['Phanh chắc và giữ nguyên làn', 'Đánh lái gấp sang làn khác', 'Tăng tốc để vượt qua nó', 'Tắt đèn pha'], 'Đánh lái né thường gây tai nạn nặng hơn. Phanh và giữ làn.'],
+    ['safe', '', 'Before backing up, you should:', ['Check behind the vehicle and look over your shoulder through the rear window', 'Rely only on your mirrors', 'Honk and back up quickly', 'Open the door and lean out'], 'Mirrors miss low objects and children. Turn and look, and back up slowly.',
+      'Trước khi lùi xe, bạn nên:', ['Kiểm tra phía sau xe và ngoái nhìn qua kính sau', 'Chỉ dựa vào gương', 'Bấm còi rồi lùi nhanh', 'Mở cửa thò người ra nhìn'], 'Gương không thấy vật thấp và trẻ nhỏ. Quay lại nhìn và lùi thật chậm.'],
+    ['safe', '', 'If your car has air bags, seat belts are:', ['Still required and still needed', 'No longer needed', 'Needed only on the highway', 'Needed only for passengers'], 'Air bags work with seat belts, not instead of them.',
+      'Nếu xe có túi khí thì dây an toàn:', ['Vẫn bắt buộc và vẫn cần thiết', 'Không cần nữa', 'Chỉ cần trên cao tốc', 'Chỉ cần cho hành khách'], 'Túi khí hoạt động cùng dây an toàn, không thay thế được dây.'],
+    ['safe', '', 'After passing a large truck, you should move back in front of it when:', ['You can see the front of the truck in your rearview mirror', 'You are one car length ahead', 'The truck driver honks', 'You have passed its rear wheels'], 'Trucks need much more room to stop. Do not cut in close.',
+      'Sau khi vượt xe tải lớn, bạn nên trở về làn trước mặt nó khi:', ['Thấy đầu xe tải trong gương chiếu hậu', 'Đã vượt lên một thân xe', 'Tài xế xe tải bấm còi', 'Đã qua bánh sau của nó'], 'Xe tải cần quãng đường dừng dài hơn nhiều. Đừng tạt đầu sát nó.'],
+    ['safe', '', 'A large truck ahead signals a right turn and swings left first. You should:', ['Stay back and not squeeze by on its right', 'Pass quickly on the right', 'Pull up beside its cab', 'Honk until it moves over'], 'Trucks swing wide to turn. The space on the right will close.',
+      'Xe tải lớn phía trước xi nhan rẽ phải và lấn sang trái trước. Bạn nên:', ['Giữ khoảng cách phía sau, không chen vào bên phải nó', 'Vượt nhanh bên phải', 'Chạy lên ngang cabin', 'Bấm còi tới khi nó tránh'], 'Xe tải phải mở rộng vòng cua. Khoảng trống bên phải sẽ bị khép lại.'],
+    ['safe', '', 'An aggressive driver is trying to provoke you. You should:', ['Avoid eye contact, give them room, and let them go', 'Brake check them', 'Speed up and block them', 'Pull over and confront them'], 'Do not engage. Make space and report dangerous driving if needed.',
+      'Một tài xế hung hăng đang cố khiêu khích bạn. Bạn nên:', ['Tránh nhìn vào mắt, nhường đường và để họ đi', 'Phanh dọa họ', 'Tăng tốc chặn đầu họ', 'Tấp vào lề để nói chuyện phải trái'], 'Đừng đáp trả. Tạo khoảng cách và báo cảnh sát nếu họ lái nguy hiểm.'],
+    ['safe', '', 'In cold weather, which part of the road usually freezes first?', ['Bridges and overpasses', 'Tunnels', 'Flat stretches in the sun', 'Parking lots'], 'Cold air passes above and below a bridge, so ice forms there first.',
+      'Khi trời lạnh, phần đường nào thường đóng băng trước?', ['Cầu và cầu vượt', 'Đường hầm', 'Đoạn bằng phẳng có nắng', 'Bãi đậu xe'], 'Không khí lạnh đi qua cả trên lẫn dưới cầu, nên băng xuất hiện ở đó trước.'],
+    ['safe', '', 'Your car breaks down on the highway. You should:', ['Pull as far off the road as you can and turn on your hazard lights', 'Stop in your lane with the lights off', 'Stand behind the car to wave traffic by', 'Leave the car in the right lane'], 'Get the vehicle off the travel lanes, switch on the flashers, and stay clear of traffic.',
+      'Xe bị hỏng trên đường cao tốc. Bạn nên:', ['Tấp vào lề càng xa mặt đường càng tốt và bật đèn khẩn cấp', 'Dừng trong làn và tắt đèn', 'Đứng sau xe vẫy cho xe khác tránh', 'Để xe ở làn phải'], 'Đưa xe ra khỏi làn xe chạy, bật đèn nháy và đứng tránh xa dòng xe.'],
+    ['safe', '', 'When leaving an interstate, you should slow down:', ['In the exit lane, after you leave the main road', 'On the main road well before the exit', 'Only at the end of the ramp', 'By braking hard at the last moment'], 'Keep your speed on the highway, then slow down in the deceleration lane.',
+      'Khi rời đường interstate, bạn nên giảm tốc:', ['Trong làn ra, sau khi đã rời đường chính', 'Trên đường chính từ xa trước lối ra', 'Chỉ ở cuối đoạn dốc ra', 'Bằng cách phanh gấp phút chót'], 'Giữ tốc độ trên đường chính, vào làn giảm tốc rồi mới chậm lại.'],
+    ['safe', '', 'Good drivers keep their eyes:', ['Moving and looking well ahead, not fixed on the car in front', 'On the hood of the car', 'On the speedometer most of the time', 'On the car directly ahead only'], 'Scan far ahead, to the sides and in the mirrors so you can spot trouble early.',
+      'Người lái xe giỏi để mắt:', ['Quan sát liên tục và nhìn xa phía trước, không dán vào xe trước mặt', 'Vào nắp ca pô', 'Phần lớn thời gian vào đồng hồ tốc độ', 'Chỉ vào xe ngay phía trước'], 'Quét mắt xa phía trước, hai bên và gương để phát hiện nguy hiểm sớm.']
+  ];
+  var Q = RAW.map(function (r, i) {
+    return { id: i, c: r[0], s: r[1], en: { q: r[2], o: r[3], w: r[4] }, vi: { q: r[5], o: r[6], w: r[7] } };
+  });
+
+  // ---------- assistant study guide: keywords (no accents), answers ----------
+  var KB = [
+    { k: ['how many question', 'bao nhieu cau', 'so cau', 'test format', 'passing score', 'diem dau', 'dau bao nhieu', 'knowledge test', 'thi ly thuyet'],
+      en: 'The Tennessee knowledge test has 30 multiple-choice questions. You pass with 24 correct, which is 80%. It covers four areas: signs and signals, rules of the road, alcohol and drugs, and safe driving.',
+      vi: 'Bài thi lý thuyết Tennessee có 30 câu trắc nghiệm. Đậu khi đúng 24 câu, tức 80%. Đề gồm 4 phần: biển báo và đèn, luật đi đường, rượu bia và chất kích thích, lái xe an toàn.' },
+    { k: ['language', 'ngon ngu', 'vietnamese', 'tieng viet', 'translate', 'dictionary', 'tu dien'],
+      en: 'News reports say the written test is offered in English, Spanish, German, Korean and Japanese, and that a translation dictionary is allowed. Vietnamese was not on the list. Confirm with your Driver Services Center before you go.',
+      vi: 'Theo báo chí, bài thi viết có tiếng Anh, Tây Ban Nha, Đức, Hàn và Nhật, và được mang từ điển dịch. Không có tiếng Việt. Nên hỏi lại trung tâm Driver Services trước khi đi thi.' },
+    { k: ['speed limit', 'toc do', 'interstate', 'cao toc', 'mph', '70', 'highway', 'how fast', 'chay nhanh'],
+      en: 'Speed limits to remember: 70 mph is the maximum on interstates, and 15 mph applies in a school zone when the flashers are on. A posted sign always overrides these, and you must slow down further when conditions are bad.',
+      vi: 'Tốc độ cần nhớ: tối đa 70 mph trên interstate, 15 mph ở khu trường học khi đèn đang nháy. Biển ghi khác thì theo biển, và trời xấu thì phải chạy chậm hơn nữa.' },
+    { k: ['school zone', 'khu truong hoc', 'truong hoc', '15 mph', 'flasher'],
+      en: 'In a school zone with warning flashers operating, the limit is 15 mph unless a sign shows a different number.',
+      vi: 'Ở khu trường học khi đèn cảnh báo đang nháy, giới hạn là 15 mph trừ khi biển ghi số khác.' },
+    { k: ['signal', 'xi nhan', 'turn signal', 'bao re', '50 feet', 'before turn', 'truoc khi re'],
+      en: 'Signal for at least the last 50 feet before you turn. Signal before changing lanes and before pulling away from the curb too.',
+      vi: 'Bật xi nhan ít nhất 50 feet (khoảng 15 mét) trước khi rẽ. Đổi làn hay rời lề cũng phải báo trước.' },
+    { k: ['headlight', 'den pha', 'bat den', 'sunset', 'sunrise', 'mat troi', 'night', 'ban dem', 'troi toi'],
+      en: 'Headlights must be on from 30 minutes after sunset to 30 minutes before sunrise, and whenever you cannot see clearly ahead, such as in rain or fog.',
+      vi: 'Phải bật đèn từ 30 phút sau khi mặt trời lặn tới 30 phút trước khi mặt trời mọc, và bất cứ lúc nào tầm nhìn kém như mưa hay sương mù.' },
+    { k: ['high beam', 'den chieu xa', 'dim', 'ha den', '500 feet', 'low beam', 'den cos'],
+      en: 'Switch from high beams to low beams when you are within 500 feet of a vehicle you are meeting or following. Use low beams in fog.',
+      vi: 'Chuyển từ đèn pha sang đèn cos khi cách xe ngược chiều hoặc xe phía trước trong vòng 500 feet. Sương mù thì dùng đèn cos.' },
+    { k: ['park', 'dau xe', 'do xe', 'fire hydrant', 'tru cuu hoa', 'hydrant', 'parking distance'],
+      en: 'Parking distances: stay at least 15 feet from a fire hydrant, 30 feet from a stop sign or traffic signal, and 50 feet from a railroad crossing. Never park in a crosswalk or on a sidewalk.',
+      vi: 'Khoảng cách đậu xe: cách trụ cứu hỏa ít nhất 15 feet, cách biển STOP hoặc đèn giao thông 30 feet, cách đường ray 50 feet. Không đậu trên vạch qua đường hay vỉa hè.' },
+    { k: ['railroad', 'train', 'duong ray', 'xe lua', 'tau hoa', 'crossing gate'],
+      en: 'When a train is coming, stop between 15 and 50 feet from the nearest rail. Never drive around lowered gates. A round yellow sign with an X warns that a crossing is ahead.',
+      vi: 'Khi tàu sắp tới, dừng cách đường ray gần nhất từ 15 tới 50 feet. Không bao giờ lách qua thanh chắn đã hạ. Biển tròn vàng có chữ X báo sắp tới đường ray.' },
+    { k: ['four way', '4 way', 'nga tu', 'right of way', 'quyen uu tien', 'who goes first', 'ai di truoc', 'stop sign', 'bien stop', 'nhuong'],
+      en: 'At a four-way stop the first vehicle to arrive goes first. If two arrive together, the driver on the left yields to the driver on the right. Always yield to pedestrians in a crosswalk.',
+      vi: 'Ở ngã tư bốn biển STOP, xe tới trước đi trước. Hai xe tới cùng lúc thì xe bên trái nhường xe bên phải. Luôn nhường người đi bộ trong vạch qua đường.' },
+    { k: ['school bus', 'xe buyt truong', 'xe bus', 'xe buyt'],
+      en: 'When a school bus stops with red lights flashing on a two-lane road, traffic in both directions must stop and wait until the lights go off. Yellow flashing lights mean the bus is about to stop.',
+      vi: 'Xe buýt trường dừng và nháy đèn đỏ trên đường hai làn: xe ở cả hai chiều phải dừng chờ tới khi đèn tắt. Đèn vàng nháy nghĩa là xe buýt sắp dừng.' },
+    { k: ['right on red', 're phai den do', 'turn on red', 'den do re phai', 're phai'],
+      en: 'You may turn right on red after a complete stop and after yielding to traffic and pedestrians, unless a No Turn On Red sign is posted.',
+      vi: 'Được rẽ phải khi đèn đỏ sau khi dừng hẳn và nhường xe, người đi bộ, trừ khi có biển No Turn On Red.' },
+    { k: ['emergency vehicle', 'xe uu tien', 'ambulance', 'xe cuu thuong', 'siren', 'coi hu', 'fire truck', 'police car', 'xe canh sat', 'move over'],
+      en: 'If an emergency vehicle approaches with siren and lights, pull to the right edge and stop. If one is stopped on the roadside with lights flashing, the Move Over law says to change to a lane away from it, or slow down if you cannot.',
+      vi: 'Xe ưu tiên tới với còi và đèn: tấp sát lề phải rồi dừng. Nếu xe ưu tiên đang dừng bên lề và nháy đèn, luật Move Over yêu cầu chuyển sang làn xa hơn, không được thì giảm tốc.' },
+    { k: ['phone', 'dien thoai', 'hands free', 'hands-free', 'text', 'nhan tin', 'cell'],
+      en: "Tennessee's hands-free law: you may not hold a phone while driving. A mounted phone or a hands-free device is allowed.",
+      vi: 'Luật hands-free của Tennessee: không được cầm điện thoại khi đang lái. Gắn trên giá hoặc dùng thiết bị rảnh tay thì được.' },
+    { k: ['bicycle', 'xe dap', 'bike', 'cyclist', '3 feet', 'pedestrian', 'nguoi di bo', 'crosswalk', 'vach qua duong'],
+      en: 'Leave at least 3 feet when passing a bicycle. Yield to pedestrians in crosswalks every time.',
+      vi: 'Vượt xe đạp phải cách ít nhất 3 feet. Luôn nhường người đi bộ trong vạch qua đường.' },
+    { k: ['bac', 'nong do con', 'alcohol limit', 'dui', 'drunk', 'say ruou', 'ruou', 'bia', '0.08', '0.02', 'under 21', 'duoi 21', 'legal limit'],
+      en: 'BAC limits in Tennessee: 0.08% for drivers 21 and older, 0.02% for drivers under 21. You can still be arrested below those numbers if you are impaired.',
+      vi: 'Giới hạn nồng độ cồn ở Tennessee: 0,08% với người từ 21 tuổi, 0,02% với người dưới 21 tuổi. Thấp hơn mức đó mà lái không tỉnh táo thì vẫn có thể bị bắt.' },
+    { k: ['implied consent', 'refuse', 'tu choi', 'breath test', 'thoi nong do', 'chemical test', 'kiem tra'],
+      en: 'Implied consent means that by driving in Tennessee you have agreed to a chemical test after a lawful DUI arrest. Refusing can cost you your license even without a DUI conviction.',
+      vi: 'Implied consent nghĩa là lái xe ở Tennessee thì coi như đã đồng ý kiểm tra sau khi bị bắt hợp pháp vì DUI. Từ chối có thể bị tước bằng dù không bị kết tội DUI.' },
+    { k: ['sober', 'het say', 'tinh ruou', 'coffee', 'ca phe', 'cold shower'],
+      en: 'Only time sobers you up. Coffee, food, fresh air and cold showers do not lower your BAC.',
+      vi: 'Chỉ thời gian mới làm hết say. Cà phê, đồ ăn, hóng gió hay tắm nước lạnh không làm giảm nồng độ cồn.' },
+    { k: ['medicine', 'thuoc', 'prescription', 'drug', 'ma tuy', 'open container', 'chai da mo', 'lon da mo'],
+      en: 'Any drug that impairs driving can lead to a DUI, including prescription and over-the-counter medicine. Mixing drugs with alcohol multiplies the effect. A driver also may not drink or keep an open container while driving.',
+      vi: 'Bất kỳ loại thuốc nào làm giảm khả năng lái đều có thể dẫn tới DUI, kể cả thuốc kê đơn và thuốc mua ngoài quầy. Dùng chung với rượu thì tác dụng tăng mạnh. Tài xế cũng không được uống hay để chai lon đã mở khi lái.' },
+    { k: ['hydroplan', 'truot nuoc', 'rain', 'mua', 'wet road', 'duong uot', 'slippery', 'tron'],
+      en: 'In rain, slow down and leave more room. Roads are slickest in the first few minutes of rain. If you hydroplane, ease off the gas and keep the wheel straight. Do not brake hard.',
+      vi: 'Trời mưa thì giảm tốc và giữ khoảng cách xa hơn. Đường trơn nhất vài phút đầu mới mưa. Nếu bị trượt nước, nhả ga từ từ và giữ thẳng lái, không phanh gấp.' },
+    { k: ['fog', 'suong mu'],
+      en: 'In fog, slow down and use low beam headlights. High beams reflect off the fog.',
+      vi: 'Sương mù thì giảm tốc và dùng đèn cos. Đèn pha sẽ bị sương phản lại làm chói.' },
+    { k: ['skid', 'truot banh', 'blowout', 'no lop', 'brake fail', 'mat phanh', 'hong phanh', 'tire', 'lop', 'emergency', 'khan cap'],
+      en: 'Emergencies: in a skid, ease off the gas and steer where you want the front to go. For a blowout, hold the wheel firmly and slow down gradually. If the brakes fail, pump the pedal, shift to a lower gear and use the parking brake.',
+      vi: 'Tình huống khẩn cấp: trượt bánh thì nhả ga và đánh lái về hướng muốn đầu xe đi. Nổ lốp thì giữ chặt vô lăng và giảm tốc từ từ. Mất phanh thì nhồi bàn đạp, về số thấp và dùng phanh tay.' },
+    { k: ['blind spot', 'diem mu', 'change lane', 'doi lan', 'truck', 'xe tai', 'no zone', 'tailgat', 'bam duoi', 'following distance', 'khoang cach'],
+      en: 'Check mirrors and look over your shoulder before changing lanes. Around trucks, if you cannot see their mirrors they cannot see you. If someone tailgates you, let them pass. Keep at least two seconds behind the car ahead, and more in bad weather.',
+      vi: 'Xem gương và ngoái qua vai trước khi đổi làn. Gần xe tải, không thấy gương của nó thì tài xế không thấy bạn. Bị bám đuôi thì để họ vượt. Giữ cách xe trước ít nhất hai giây, trời xấu thì xa hơn.' },
+    { k: ['merge', 'nhap lan', 'acceleration lane', 'lan tang toc', 'missed exit', 'lo loi ra', 'exit', 'loi ra', 'drowsy', 'buon ngu', 'tired', 'met'],
+      en: 'On interstates, use the acceleration lane to match traffic speed before merging. If you miss an exit, go to the next one and never back up. If you feel drowsy, pull off somewhere safe and rest.',
+      vi: 'Trên interstate, dùng làn tăng tốc để lên bằng tốc độ dòng xe rồi mới nhập làn. Lỡ lối ra thì đi tới lối kế, không lùi xe. Buồn ngủ thì tấp vào chỗ an toàn nghỉ.' },
+    { k: ['sign shape', 'hinh bien', 'shape', 'octagon', 'triangle', 'tam giac', 'diamond', 'hinh thoi', 'pentagon', 'pennant', 'bien bao', 'signs'],
+      en: 'Sign shapes: octagon is stop, downward triangle is yield, diamond is warning, pentagon is school, round is railroad advance warning, pennant is no passing zone, rectangle is regulatory or guide.',
+      vi: 'Hình dạng biển: 8 cạnh là STOP, tam giác ngược là nhường đường, hình thoi là cảnh báo, 5 cạnh là trường học, hình tròn là báo trước đường ray, cờ đuôi nheo là cấm vượt, chữ nhật là quy định hoặc chỉ dẫn.' },
+    { k: ['sign color', 'mau bien', 'colors', 'mau cam', 'orange', 'yellow sign', 'green sign', 'blue sign', 'brown'],
+      en: 'Sign colors: red is stop or prohibited, yellow is warning, orange is construction, white is regulatory, green is directions, blue is motorist services, brown is recreation areas.',
+      vi: 'Màu biển: đỏ là dừng hoặc cấm, vàng là cảnh báo, cam là thi công, trắng là quy định, xanh lá là chỉ đường, xanh dương là dịch vụ, nâu là khu giải trí.' },
+    { k: ['traffic light', 'den giao thong', 'flashing', 'nhap nhay', 'yellow light', 'den vang', 'red light', 'den do', 'green arrow', 'mui ten'],
+      en: 'Traffic lights: flashing red means stop like a stop sign, flashing yellow means slow and proceed with caution, steady yellow means red is next so stop if safe, a green arrow gives a protected turn.',
+      vi: 'Đèn giao thông: đỏ nháy thì dừng như biển STOP, vàng nháy thì giảm tốc đi cẩn thận, vàng liên tục là sắp đỏ nên dừng nếu an toàn, mũi tên xanh là được rẽ có bảo vệ.' },
+    { k: ['lines', 'vach', 'yellow line', 'vach vang', 'white line', 'vach trang', 'passing', 'vuot', 'pavement marking'],
+      en: 'Pavement lines: yellow separates traffic going opposite ways, white separates lanes going the same way. Broken lines may be crossed when safe, solid lines should not be. Double solid yellow means no passing in either direction.',
+      vi: 'Vạch kẻ đường: vàng chia hai chiều ngược nhau, trắng chia các làn cùng chiều. Vạch đứt được cắt qua khi an toàn, vạch liền thì không. Hai vạch vàng liền là cấm vượt cả hai chiều.' },
+    { k: ['child seat', 'car seat', 'ghe tre em', 'booster', 'tre em', 'em be', 'seat belt', 'day an toan', 'that day'],
+      en: 'Seat belts: the driver and all front seat passengers must buckle up. Children under 1 year or 20 pounds or less ride rear-facing. Ages 1 to 3 over 20 pounds ride forward-facing. Ages 4 to 8 under 4 feet 9 inches use a booster seat.',
+      vi: 'Dây an toàn: tài xế và mọi người ngồi ghế trước phải thắt. Trẻ dưới 1 tuổi hoặc từ 20 pound trở xuống ngồi ghế quay về sau. Từ 1 tới 3 tuổi trên 20 pound ngồi ghế quay về trước. Từ 4 tới 8 tuổi thấp hơn 4 feet 9 inch dùng ghế nâng.' },
+    { k: ['points', 'diem phat', 'suspend', 'treo bang', 'address', 'dia chi', 'new resident', 'moi chuyen toi', 'doi bang', 'crash', 'tai nan', 'accident', 'insurance', 'bao hiem'],
+      en: 'License rules: report an address change within 10 days. New residents must get a Tennessee license within 30 days. Twelve points in 12 months brings a notice of proposed suspension. After a crash you must stop, help the injured and exchange information, and you must be able to show proof of insurance.',
+      vi: 'Quy định về bằng lái: đổi địa chỉ phải báo trong 10 ngày. Người mới tới phải đổi sang bằng Tennessee trong 30 ngày. Bị 12 điểm phạt trong 12 tháng thì nhận thông báo đề nghị treo bằng. Khi tai nạn phải dừng lại, giúp người bị thương, trao đổi thông tin, và phải có giấy tờ bảo hiểm.' },
+    { k: ['hill', 'doc', 'uphill', 'downhill', 'len doc', 'xuong doc', 'curb', 'be banh'],
+      en: 'Parking on a hill: facing downhill, turn the wheels toward the curb. Facing uphill with a curb, turn the wheels away from the curb. With no curb, turn them toward the edge of the road. Always set the parking brake.',
+      vi: 'Đậu xe trên dốc: hướng xuống dốc thì bẻ bánh vào lề. Hướng lên dốc có bó vỉa thì bẻ bánh ra xa lề. Không có bó vỉa thì bẻ bánh về phía mép đường. Luôn kéo phanh tay.' },
+    { k: ['roundabout', 'vong xuyen', 'bung binh', 'left turn', 're trai', 'u-turn', 'quay dau', 'center lane', 'lan giua'],
+      en: 'Turns: at a roundabout, yield to traffic already in the circle and travel counterclockwise. On a plain green light, a left turn must yield to oncoming traffic and pedestrians. The center lane with yellow lines on both sides is only for left turns.',
+      vi: 'Rẽ và quay đầu: vào vòng xuyến phải nhường xe đang trong vòng và chạy ngược chiều kim đồng hồ. Đèn xanh thường thì rẽ trái phải nhường xe ngược chiều và người đi bộ. Làn giữa có vạch vàng hai bên chỉ dùng để rẽ trái.' },
+    { k: ['permit', 'learner', 'gdl', 'intermediate', 'teen', 'curfew', 'gio gioi nghiem', 'tap lai', 'bang tap'],
+      en: 'Graduated license: a learner permit holder must drive with a licensed driver age 21 or older in the front seat and may not drive from 10 p.m. to 6 a.m. The intermediate restricted license allows one passenger and no driving from 11 p.m. to 6 a.m. These steps apply to drivers under 18.',
+      vi: 'Bằng lái theo cấp: người có learner permit phải có người từ 21 tuổi có bằng ngồi ghế trước và không được lái từ 10 giờ tối tới 6 giờ sáng. Bằng intermediate restricted chỉ được chở một hành khách và không lái từ 11 giờ tối tới 6 giờ sáng. Các cấp này áp dụng cho người dưới 18 tuổi.' },
+    { k: ['motorcycle', 'mo to', 'xe may', 'work zone', 'thi cong', 'deer', 'huou', 'flood', 'ngap', 'ice', 'bang', 'bridge', 'cau'],
+      en: 'Sharing the road and hazards: a motorcycle gets a full lane. Slow down and obey flaggers in work zones. Brake and stay in your lane for a deer. Never drive into flood water. Bridges and overpasses freeze first.',
+      vi: 'Chia sẻ đường và nguy hiểm: mô tô được dùng trọn một làn. Giảm tốc và nghe theo người cầm cờ ở khu thi công. Gặp hươu thì phanh và giữ làn. Không lái vào chỗ ngập. Cầu và cầu vượt đóng băng trước.' },
+    { k: ['study', 'hoc', 'on thi', 'tip', 'meo', 'prepare', 'chuan bi', 'how to pass', 'lam sao dau'],
+      en: 'Study plan: read the official Tennessee driver manual once, then run the exam simulator here until you score 27 or more a few times in a row. Use "Review my mistakes" between attempts. The numbers people miss most are 50 feet, 500 feet, 15 mph, 70 mph, 0.08 and 0.02.',
+      vi: 'Cách ôn: đọc sách lái xe chính thức của Tennessee một lượt, rồi làm thi thử ở đây tới khi được 27 câu trở lên vài lần liên tiếp. Giữa các lần thi thì dùng "Ôn lại câu sai". Mấy con số hay sai nhất: 50 feet, 500 feet, 15 mph, 70 mph, 0,08 và 0,02.' }
+  ];
+
+  // ---------- state ----------
+  var KEY = 'tn-prep-v2';
+  var D = { ui: 'en', ql: 'en', stat: {}, best: null, exams: 0 };
+  try { var saved = JSON.parse(localStorage.getItem(KEY)); if (saved && typeof saved === 'object') { for (var p in D) if (saved[p] != null) D[p] = saved[p]; } } catch (e) {}
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(D)); } catch (e) {} }
+  function t(key, vars) {
+    var s = T[D.ui][key];
+    if (vars) for (var v in vars) s = s.replace('{' + v + '}', vars[v]);
+    return s;
+  }
+  function missedIds() { return Q.filter(function (x) { return D.stat[x.id] === 0; }); }
+  function shuffle(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var s = a[i]; a[i] = a[j]; a[j] = s; } return a; }
+  function byCat(c) { return Q.filter(function (x) { return x.c === c; }); }
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  function btn(cls, text, fn) { var b = el('button', cls, text); b.type = 'button'; if (fn) b.addEventListener('click', fn); return b; }
+
+  var app = document.getElementById('app');
+  var S = null, view = 'home', timer = null, chatLog = [];
+
+  // ---------- chrome ----------
+  function chrome() {
+    document.documentElement.lang = D.ui;
+    var h = document.getElementById('title');
+    h.textContent = '';
+    h.appendChild(document.createTextNode(t('title')[0]));
+    h.appendChild(el('span', null, t('title')[1]));
+    document.title = D.ui === 'vi' ? 'Ôn thi bằng lái Tennessee' : 'Tennessee Permit Prep';
+    document.getElementById('sub').textContent = t('sub');
+    document.getElementById('gear').textContent = '⚙ ' + t('gear');
+    document.getElementById('disc').textContent = t('disc');
+    settings();
+  }
+  function seg(cur, fn) {
+    var s = el('div', 'seg');
+    [['en', 'English'], ['vi', 'Tiếng Việt']].forEach(function (p) {
+      var b = btn(null, p[1], function () { fn(p[0]); });
+      b.setAttribute('aria-pressed', cur === p[0] ? 'true' : 'false');
+      s.appendChild(b);
+    });
+    return s;
+  }
+  function settings() {
+    var box = document.getElementById('settings');
+    box.textContent = '';
+    var r1 = el('div', 'set-row'); r1.appendChild(el('span', null, t('uiLang')));
+    r1.appendChild(seg(D.ui, function (v) { D.ui = v; save(); chrome(); redraw(); }));
+    var r2 = el('div', 'set-row'); r2.appendChild(el('span', null, t('qLang')));
+    r2.appendChild(seg(D.ql, function (v) { D.ql = v; save(); if (S) S.lang = v; chrome(); redraw(); }));
+    var r3 = el('div', 'set-row');
+    var rb = btn('danger', t('reset'), function () { D.stat = {}; D.best = null; D.exams = 0; save(); rb.textContent = t('resetDone'); if (view === 'home') home(); });
+    r3.appendChild(rb);
+    box.appendChild(r1); box.appendChild(r2); box.appendChild(r3);
+  }
+  document.getElementById('gear').addEventListener('click', function () {
+    var box = document.getElementById('settings');
+    box.hidden = !box.hidden;
+    this.setAttribute('aria-expanded', box.hidden ? 'false' : 'true');
+  });
+  function redraw() { if (view === 'home') home(); else if (view === 'quiz') render(); else if (view === 'results') results(true); else if (view === 'chat') chat(); }
+  function stopTimer() { if (timer) { clearInterval(timer); timer = null; } }
+  function fmt(sec) { var m = Math.floor(sec / 60), s = sec % 60; return m + ':' + (s < 10 ? '0' : '') + s; }
+
+  // ---------- home ----------
+  function home() {
+    view = 'home'; S = null; stopTimer();
+    app.textContent = '';
+    var facts = el('div', 'facts');
+    [t('f1'), t('f2'), t('f3')].forEach(function (x) { facts.appendChild(el('span', null, x)); });
+    app.appendChild(facts);
+
+    var wrap = el('div', 'modes');
+    function mode(title, sub, fn, disabled, alt) {
+      var b = btn('mode' + (alt ? ' alt' : ''), null, disabled ? null : fn);
+      b.appendChild(el('b', null, title)); b.appendChild(el('small', null, sub));
+      if (disabled) b.disabled = true;
+      wrap.appendChild(b);
+    }
+    var miss = missedIds();
+    mode(t('exam'), t('examSub'), function () {
+      var pick = [];
+      [['signs', 8], ['rules', 8], ['alcohol', 7], ['safe', 7]].forEach(function (p) { pick = pick.concat(shuffle(byCat(p[0])).slice(0, p[1])); });
+      start(shuffle(pick), true, 'exam');
+    });
+    mode(t('all', { n: Q.length }), t('allSub'), function () { start(shuffle(Q), false, 'all'); });
+    mode(t('weak', { n: miss.length }), miss.length ? t('weakSub') : t('weakNone'), function () { start(shuffle(miss), false, 'weak'); }, !miss.length);
+    mode(t('ask'), t('askSub'), chat, false, true);
+    app.appendChild(wrap);
+
+    app.appendChild(el('h2', null, t('prog')));
+    var okCount = Q.filter(function (x) { return D.stat[x.id] === 1; }).length;
+    var st = el('div', 'stats');
+    [[okCount + '/' + Q.length, t('mastered')], [D.best == null ? '-' : D.best + '/30', t('best')], [String(D.exams), t('taken')]].forEach(function (p) {
+      var d = el('div'); d.appendChild(el('b', null, p[0])); d.appendChild(el('small', null, p[1])); st.appendChild(d);
+    });
+    app.appendChild(st);
+
+    app.appendChild(el('h2', null, t('bySec')));
+    var cats = el('div', 'cats');
+    Object.keys(CATS).forEach(function (c) {
+      var list = byCat(c), ok = list.filter(function (x) { return D.stat[x.id] === 1; }).length;
+      var b = btn(null, null, function () { start(shuffle(list), false, c); });
+      b.appendChild(el('span', null, CATS[c][D.ui]));
+      var m = el('div', 'meter'), f = el('i'); f.style.width = (ok / list.length * 100) + '%'; m.appendChild(f); b.appendChild(m);
+      b.appendChild(el('small', null, ok + ' ' + t('of') + ' ' + list.length + ' ' + t('mastered')));
+      cats.appendChild(b);
+    });
+    app.appendChild(cats);
+  }
+
+  // ---------- quiz ----------
+  function label() { return S.kind === 'exam' ? t('exam') : S.kind === 'all' ? t('all', { n: Q.length }) : S.kind === 'weak' ? t('weak', { n: S.list.length }) : CATS[S.kind][D.ui]; }
+  function start(list, exam, kind) {
+    S = { list: list, exam: exam, kind: kind, i: 0, answers: [], order: list.map(function () { return shuffle([0, 1, 2, 3]); }), lang: D.ql, t0: Date.now(), secs: 0, warn: false };
+    view = 'quiz';
+    stopTimer();
+    if (exam) timer = setInterval(function () { var c = document.getElementById('clock'); if (c && S) c.textContent = fmt(Math.floor((Date.now() - S.t0) / 1000)); }, 1000);
+    render(); window.scrollTo(0, 0);
+  }
+  function render() {
+    view = 'quiz';
+    var x = S.list[S.i], picked = S.answers[S.i], L = x[S.lang];
+    app.textContent = '';
+
+    var bar = el('div', 'bar');
+    bar.appendChild(btn('link', t('quit'), home));
+    var mid = el('span', null, (S.i + 1) + ' / ' + S.list.length);
+    bar.appendChild(mid);
+    if (S.exam) { var ck = el('span', null, fmt(Math.floor((Date.now() - S.t0) / 1000))); ck.id = 'clock'; bar.appendChild(ck); }
+    app.appendChild(bar);
+
+    var done = S.answers.filter(function (a) { return a != null; }).length;
+    var tr = el('div', 'track'), fill = el('i'); fill.style.width = (done / S.list.length * 100) + '%'; tr.appendChild(fill); app.appendChild(tr);
+
+    var card = el('div', 'card');
+    var top = el('div', 'card-top');
+    top.appendChild(el('div', 'tag', CATS[x.c][D.ui]));
+    var sw = btn('switch', null, function () { S.lang = S.lang === 'en' ? 'vi' : 'en'; render(); });
+    sw.setAttribute('role', 'switch'); sw.setAttribute('aria-checked', S.lang === 'vi' ? 'true' : 'false'); sw.setAttribute('aria-label', 'Vietnamese translation');
+    sw.appendChild(el('span', S.lang === 'en' ? 'on' : null, 'EN'));
+    sw.appendChild(el('span', 'knob'));
+    sw.appendChild(el('span', S.lang === 'vi' ? 'on' : null, 'VI'));
+    top.appendChild(sw);
+    card.appendChild(top);
+
+    if (x.s) { var sg = el('div', 'sign'); sg.innerHTML = SIGNS[x.s]; card.appendChild(sg); }
+    card.appendChild(el('p', 'q', L.q));
+
+    var reveal = picked != null;
+    var opts = el('div', 'opts');
+    S.order[S.i].forEach(function (oi, n) {
+      var b = btn(null, null, reveal ? null : function () { choose(oi); });
+      b.appendChild(el('kbd', null, String(n + 1)));
+      b.appendChild(el('span', null, L.o[oi]));
+      if (reveal) { b.disabled = true; if (oi === 0) b.className = 'right'; else if (oi === picked) b.className = 'wrong'; }
+      else if (oi === picked) b.className = 'sel';
+      opts.appendChild(b);
+    });
+    card.appendChild(opts);
+
+    if (reveal) {
+      var why = el('div', 'why');
+      why.appendChild(el('b', null, picked === 0 ? T[S.lang].right : T[S.lang].wrong));
+      why.appendChild(document.createTextNode(L.w));
+      card.appendChild(why);
+    }
+
+    var last = S.i === S.list.length - 1;
+    var nav = el('div', 'nav');
+    var back = btn('ghost', t('prev'), function () { S.i--; S.warn = false; render(); });
+    back.disabled = S.i === 0;
+    nav.appendChild(back);
+    var nx = btn('next', last ? (S.warn ? t('finishAny') : t('finish')) : t('next'), advance);
+    nx.id = 'nextBtn';
+    nx.disabled = !S.exam && picked == null;
+    nav.appendChild(nx);
+    card.appendChild(nav);
+    if (S.warn) card.appendChild(el('p', 'note', t('unanswered', { n: S.list.length - done })));
+    app.appendChild(card);
+
+    if (S.exam) {
+      var dots = el('div', 'dots');
+      S.list.forEach(function (_, i) {
+        var d = btn(i === S.i ? 'cur' : (S.answers[i] != null ? 'done' : ''), String(i + 1), function () { S.i = i; S.warn = false; render(); });
+        dots.appendChild(d);
+      });
+      app.appendChild(dots);
+    }
+    app.appendChild(el('p', 'hint', t('keys')));
+  }
+  function advance() {
+    var last = S.i === S.list.length - 1;
+    if (!last) { S.i++; render(); window.scrollTo(0, 0); return; }
+    var left = S.list.length - S.answers.filter(function (a) { return a != null; }).length;
+    if (S.exam && left > 0 && !S.warn) { S.warn = true; render(); return; }
+    results(false);
+  }
+  function choose(oi) {
+    var x = S.list[S.i];
+    S.answers[S.i] = oi; S.warn = false;
+    if (!S.exam) { D.stat[x.id] = oi === 0 ? 1 : 0; save(); }
+    render();
+  }
+  document.addEventListener('keydown', function (e) {
+    if (view !== 'quiz' || !S) return;
+    if (e.target && e.target.tagName === 'INPUT') return;
+    var n = parseInt(e.key, 10);
+    if (n >= 1 && n <= 4) { if (S.answers[S.i] == null) choose(S.order[S.i][n - 1]); }
+    else if (e.key === 'Enter') { var b = document.getElementById('nextBtn'); if (b && !b.disabled) { e.preventDefault(); advance(); } }
+  });
+
+  // ---------- results ----------
+  function results(again) {
+    view = 'results'; stopTimer();
+    if (!again) {
+      S.secs = Math.floor((Date.now() - S.t0) / 1000);
+      S.right = 0;
+      S.list.forEach(function (x, i) { var ok = S.answers[i] === 0; if (ok) S.right++; if (S.exam) D.stat[x.id] = ok ? 1 : 0; });
+      if (S.exam) { D.exams++; if (D.best == null || S.right > D.best) D.best = S.right; }
+      save();
+    }
+    var total = S.list.length, need = Math.ceil(total * 0.8), pass = S.right >= need;
+    app.textContent = '';
+    var sc = el('div', 'card score');
+    sc.appendChild(el('div', 'num ' + (pass ? 'pass' : 'fail'), S.right + ' / ' + total));
+    sc.appendChild(el('div', null, S.exam ? t(pass ? 'passMsg' : 'failMsg', { need: need, right: S.right }) : t('pct', { label: label(), p: Math.round(S.right / total * 100) })));
+    if (S.exam) {
+      sc.appendChild(el('div', 'tag', t('time') + ' ' + fmt(S.secs)));
+      var bd = el('div', 'breakdown');
+      Object.keys(CATS).forEach(function (c) {
+        var tot = 0, ok = 0;
+        S.list.forEach(function (x, i) { if (x.c === c) { tot++; if (S.answers[i] === 0) ok++; } });
+        if (!tot) return;
+        var r = el('div'); r.appendChild(el('span', null, CATS[c][D.ui])); r.appendChild(el('b', ok / tot >= 0.8 ? 'pass' : 'fail', ok + '/' + tot)); bd.appendChild(r);
+      });
+      sc.appendChild(bd);
+    }
+    app.appendChild(sc);
+
+    var row = el('div', 'row');
+    row.appendChild(btn('next', t('home'), home));
+    app.appendChild(row);
+
+    var wrong = [];
+    S.list.forEach(function (x, i) { if (S.answers[i] !== 0) wrong.push([x, S.answers[i]]); });
+    if (wrong.length) {
+      app.appendChild(el('h2', null, t('missedHead', { n: wrong.length })));
+      var rv = el('div', 'review');
+      wrong.forEach(function (it) {
+        var L = it[0][D.ui], a = el('article');
+        a.appendChild(el('p', null, L.q));
+        a.appendChild(el('p', 'y', t('you') + (it[1] == null ? t('none') : L.o[it[1]])));
+        a.appendChild(el('p', 'a', t('ans') + L.o[0]));
+        a.appendChild(el('p', 'w', L.w));
+        rv.appendChild(a);
+      });
+      app.appendChild(rv);
+    }
+    if (!again) window.scrollTo(0, 0);
+  }
+
+  // ---------- assistant ----------
+  function norm(s) { return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd').replace(/[^a-z0-9.\- ]+/g, ' ').replace(/\s+/g, ' ').trim(); }
+  var STOP = { the: 1, a: 1, an: 1, is: 1, are: 1, what: 1, when: 1, how: 1, do: 1, does: 1, i: 1, to: 1, of: 1, in: 1, on: 1, for: 1, and: 1, or: 1, you: 1, my: 1, it: 1, can: 1, should: 1, la: 1, gi: 1, thi: 1, co: 1, khi: 1, nao: 1, bao: 1, nhieu: 1, toi: 1, o: 1, va: 1, hay: 1, the: 1, duoc: 1, khong: 1, phai: 1, lam: 1, sao: 1 };
+  function answer(text) {
+    var qn = ' ' + norm(text) + ' ';
+    var scored = KB.map(function (e) {
+      var s = 0;
+      e.k.forEach(function (k) { if (qn.indexOf(' ' + k) > -1) s += 1 + k.split(' ').length; });
+      return [s, e];
+    }).filter(function (p) { return p[0] > 0; }).sort(function (a, b) { return b[0] - a[0]; });
+
+    var words = qn.trim().split(' ').filter(function (w) { return w.length > 2 && !STOP[w]; });
+    var qs = Q.map(function (x) {
+      var hay = ' ' + norm(x.en.q + ' ' + x.en.o[0] + ' ' + x.vi.q + ' ' + x.vi.o[0]) + ' ', s = 0;
+      words.forEach(function (w) { if (hay.indexOf(' ' + w + ' ') > -1) s++; });
+      return [s, x];
+    }).filter(function (p) { return p[0] >= 2; }).sort(function (a, b) { return b[0] - a[0]; });
+
+    var parts = [];
+    if (scored.length) {
+      parts.push(scored[0][1][D.ui]);
+      if (scored[1] && scored[1][0] >= scored[0][0] * 0.6) parts.push(scored[1][1][D.ui]);
+    }
+    var rel = qs.length ? qs[0][1] : null;
+    if (!parts.length && rel) parts.push(rel[D.ui].w);
+    if (!parts.length) return { text: t('noHit') };
+    return { text: parts.join('\n\n'), rel: rel ? rel[D.ui].q + ' → ' + rel[D.ui].o[0] : null };
+  }
+  function chat() {
+    view = 'chat'; stopTimer(); S = null;
+    app.textContent = '';
+    var bar = el('div', 'bar');
+    bar.appendChild(btn('link', t('quit'), home));
+    bar.appendChild(el('span', null, t('ask')));
+    app.appendChild(bar);
+
+    var card = el('div', 'card chat');
+    var log = el('div', 'log');
+    log.setAttribute('aria-live', 'polite');
+    function bubble(m) {
+      var d = el('div', 'msg ' + m.who, m.text);
+      if (m.rel) d.appendChild(el('small', null, t('related') + ' ' + m.rel));
+      log.appendChild(d);
+    }
+    bubble({ who: 'bot', text: t('hello') });
+    chatLog.forEach(bubble);
+    card.appendChild(log);
+
+    function ask(text) {
+      text = text.trim(); if (!text) return;
+      var a = answer(text);
+      var m1 = { who: 'me', text: text }, m2 = { who: 'bot', text: a.text, rel: a.rel };
+      chatLog.push(m1, m2); bubble(m1); bubble(m2);
+      log.scrollTop = log.scrollHeight;
+    }
+    var chips = el('div', 'chips');
+    t('chips').forEach(function (c) { chips.appendChild(btn(null, c, function () { ask(c); })); });
+    card.appendChild(chips);
+
+    var form = el('form', 'ask');
+    var inp = el('input'); inp.type = 'text'; inp.id = 'askInput'; inp.placeholder = t('askPh'); inp.setAttribute('aria-label', t('ask')); inp.autocomplete = 'off';
+    var send = el('button', 'next', t('send')); send.type = 'submit';
+    form.appendChild(inp); form.appendChild(send);
+    form.addEventListener('submit', function (e) { e.preventDefault(); ask(inp.value); inp.value = ''; });
+    card.appendChild(form);
+    app.appendChild(card);
+    log.scrollTop = log.scrollHeight;
+  }
+
+  window.__prep = { answer: answer, Q: Q, D: D };
+  chrome();
+  home();
+})();
+</script>
+</body>
+</html>
