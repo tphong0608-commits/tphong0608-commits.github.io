@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phong Vo Portfolio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* Layout idea: one narrow left-aligned column, a live terminal as the hero, sections labelled like shell paths. Single dark theme by choice. */
+:root {
+  color-scheme: dark;
+  --ink: #0b1020;        /* page background, deep navy */
+  --panel: #121a30;      /* terminal and cards */
+  --line: #24304f;       /* borders, grid */
+  --text: #e6e9f2;       /* body text */
+  --muted: #8b95b3;      /* secondary text */
+  --amber: #ffb454;      /* accent: prompts, highlights */
+  --cyan: #5ccfe6;       /* second accent: links, status */
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --font-body: "Be Vietnam Pro", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background-color: var(--ink);
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 48px 48px;
+  background-attachment: fixed;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.65;
+}
+body::before {
+  content: "";
+  position: fixed; inset: 0;
+  background: radial-gradient(ellipse at 20% 0%, rgba(11,16,32,.55), var(--ink) 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+.wrap {
+  position: relative; z-index: 1;
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 0 20px 80px;
+}
+a { color: var(--cyan); text-decoration: none; }
+a:hover { text-decoration: underline; }
+:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; border-radius: 2px; }
+
+/* nav */
+nav {
+  display: flex; flex-wrap: wrap; align-items: center;
+  justify-content: space-between; gap: 12px;
+  padding: 22px 0;
+  font-family: var(--font-mono); font-size: 14px;
+}
+.logo { color: var(--text); font-weight: 700; }
+.logo span { color: var(--amber); }
+nav ul { display: flex; flex-wrap: wrap; gap: 20px; list-style: none; margin: 0; padding: 0; }
+nav ul a { color: var(--muted); }
+nav ul a:hover { color: var(--amber); text-decoration: none; }
+
+/* hero */
+.hero { display: grid; gap: 28px; padding: 36px 0 24px; }
+.status {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--font-mono); font-size: 13px; color: var(--cyan);
+}
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--cyan); animation: pulse 2s infinite; }
+@keyframes pulse { 50% { opacity: .35; } }
+h1 {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: clamp(2.2rem, 7vw, 4rem);
+  line-height: 1.1; font-weight: 700; letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+h1 em { font-style: normal; color: var(--amber); }
+.lede { margin: 0; max-width: 60ch; color: var(--muted); font-size: 1.1rem; }
+.lede strong { color: var(--text); font-weight: 500; }
+
+/* terminal */
+.term {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(0,0,0,.45);
+  font-family: var(--font-mono); font-size: 14px;
+}
+.term-bar {
+  display: flex; align-items: center; gap: 7px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted); font-size: 12px;
+}
+.term-bar i { width: 11px; height: 11px; border-radius: 50%; background: var(--line); }
+.term-bar i:first-child { background: #ff6b6b; }
+.term-bar i:nth-child(2) { background: var(--amber); }
+.term-bar i:nth-child(3) { background: #7bd88f; }
+.term-bar b { margin-left: 8px; font-weight: 400; }
+.term-body {
+  padding: 16px; height: 300px; overflow-y: auto;
+  white-space: pre-wrap; word-break: break-word; line-height: 1.6;
+}
+.term-body .cmd { color: var(--text); }
+.term-body .ps { color: var(--amber); }
+.term-body .out { color: var(--muted); margin: 0 0 10px; }
+.term-body .hl { color: var(--cyan); }
+.term-in { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--line); }
+.term-in label { color: var(--amber); white-space: nowrap; }
+.term-in input {
+  flex: 1; min-width: 0;
+  background: transparent; border: 0; outline: 0;
+  color: var(--text); font: inherit; caret-color: var(--amber);
+}
+.term-in input::placeholder { color: #55607f; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 16px 14px; }
+.chips button {
+  font: inherit; font-size: 12px; color: var(--cyan);
+  background: transparent; border: 1px solid var(--line); border-radius: 4px;
+  padding: 4px 10px; cursor: pointer;
+}
+.chips button:hover { border-color: var(--cyan); }
+
+/* sections */
+section { padding: 56px 0 0; }
+h2 {
+  margin: 0 0 20px;
+  font-family: var(--font-mono); font-size: 1.05rem; font-weight: 500; color: var(--amber);
+}
+h2 span { color: var(--muted); }
+.about p { margin: 0 0 14px; max-width: 65ch; }
+.about p:last-child { margin: 0; }
+
+.stack { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+.stack div { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 18px; }
+.stack h3 { margin: 0 0 10px; font-family: var(--font-mono); font-size: 13px; font-weight: 500; color: var(--muted); }
+.tags { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; margin: 0; padding: 0; font-family: var(--font-mono); font-size: 13px; }
+.tags li { padding: 3px 10px; border: 1px solid var(--line); border-radius: 4px; }
+.now .tags li { border-color: var(--cyan); color: var(--cyan); }
+
+.work { display: grid; gap: 14px; }
+.work article {
+  display: grid; gap: 6px;
+  background: var(--panel); border: 1px solid var(--line);
+  border-left: 3px solid var(--amber); border-radius: 8px; padding: 18px 20px;
+}
+.work article.planned { border-left-color: var(--line); }
+.work header { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px; }
+.work h3 { margin: 0; font-size: 1.05rem; font-weight: 600; }
+.badge { font-family: var(--font-mono); font-size: 12px; color: var(--amber); }
+.planned .badge { color: var(--muted); }
+.work p { margin: 0; color: var(--muted); max-width: 65ch; }
+.work small { font-family: var(--font-mono); font-size: 12px; color: var(--cyan); }
+
+.log { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; font-family: var(--font-mono); font-size: 14px; }
+.log li { display: grid; grid-template-columns: 120px 1fr; gap: 16px; padding: 12px 0; border-top: 1px dashed var(--line); }
+.log li:last-child { border-bottom: 1px dashed var(--line); }
+.log time { color: var(--muted); }
+.log .next { color: var(--cyan); }
+.log p { margin: 0; font-family: var(--font-body); font-size: 15px; }
+
+.contact { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 26px; display: grid; gap: 14px; }
+.contact p { margin: 0; max-width: 60ch; }
+.mail { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; font-family: var(--font-mono); }
+.mail a { font-size: 1.05rem; }
+.mail button {
+  font: inherit; font-size: 13px; color: var(--ink); background: var(--amber);
+  border: 0; border-radius: 4px; padding: 6px 14px; cursor: pointer; font-weight: 700;
+}
+.mail button:hover { filter: brightness(1.1); }
+footer { padding-top: 48px; font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+
+@media (max-width: 520px) {
+  .log li { grid-template-columns: 1fr; gap: 2px; }
+  .term-body { height: 260px; font-size: 13px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .dot { animation: none; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<nav aria-label="Main">
+  <a class="logo" href="#top"><span>~/</span>phong.vo</a>
+  <ul>
+    <li><a href="#about">about</a></li>
+    <li><a href="#stack">stack</a></li>
+    <li><a href="#work">work</a></li>
+    <li><a href="#log">log</a></li>
+    <li><a href="#contact">contact</a></li>
+  </ul>
+</nav>
+
+<main id="top">
+  <div class="hero">
+    <div class="status"><span class="dot"></span>CS student @ University of Memphis</div>
+    <h1>Hi, I'm <em>Phong</em>.<br>I like making things run.</h1>
+    <p class="lede"><strong>Tuan Phong Vo.</strong> Computer Science student from Vietnam, studying in Memphis, Tennessee. Started with Python, went down to C and pointers, now heading toward AI.</p>
+
+    <div class="term" aria-label="Interactive terminal">
+      <div class="term-bar"><i></i><i></i><i></i><b>phong@memphis: ~</b></div>
+      <div class="term-body" id="termBody" aria-live="polite"></div>
+      <div class="chips" id="chips">
+        <button type="button" data-cmd="about">about</button>
+        <button type="button" data-cmd="skills">skills</button>
+        <button type="button" data-cmd="projects">projects</button>
+        <button type="button" data-cmd="contact">contact</button>
+        <button type="button" data-cmd="sudo hire-me">sudo hire-me</button>
+      </div>
+      <form class="term-in" id="termForm" autocomplete="off">
+        <label for="termInput">phong@memphis:~$</label>
+        <input id="termInput" type="text" placeholder="type help and press Enter" spellcheck="false" autocapitalize="off">
+      </form>
+    </div>
+  </div>
+
+  <section id="about" class="about">
+    <h2><span>~/</span>about</h2>
+    <p>I grew up in Nghệ An, Vietnam, took a gap year, then moved to the U.S. for college. I started at Minnesota State University, Mankato and transferred to the University of Memphis on a University Transfer Scholarship.</p>
+    <p>Computer science was not the original plan. That changed with my first Python programs. Building something, watching it break, and working out why turned out to be the one kind of studying I never get bored of.</p>
+    <p>Right now I'm working through the CS core at Memphis and teaching myself the lower-level side of programming on the weekends.</p>
+  </section>
+
+  <section id="stack">
+    <h2><span>~/</span>stack</h2>
+    <div class="stack">
+      <div>
+        <h3># languages</h3>
+        <ul class="tags"><li>Python</li><li>C</li></ul>
+      </div>
+      <div>
+        <h3># tools</h3>
+        <ul class="tags"><li>Linux (WSL / Ubuntu)</li><li>gcc</li><li>command line</li></ul>
+      </div>
+      <div class="now">
+        <h3># learning next</h3>
+        <ul class="tags"><li>data structures</li><li>HTML / CSS</li><li>Flask</li><li>AI / ML</li></ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="work">
+    <h2><span>~/</span>work</h2>
+    <div class="work">
+      <article>
+        <header><h3>Image filters in C</h3><span class="badge">[done]</span></header>
+        <p>Grayscale and sepia filters that rewrite a bitmap pixel by pixel. Part of Harvard's CS50 problem sets.</p>
+        <small>C · arrays · structs · file I/O</small>
+      </article>
+      <article>
+        <header><h3>Linked lists and manual memory</h3><span class="badge">[done]</span></header>
+        <p>Built linked lists from scratch with malloc and free, and learned the hard way what a segfault is.</p>
+        <small>C · pointers · memory management</small>
+      </article>
+      <article class="planned">
+        <header><h3>Nail salon booking app</h3><span class="badge">[planned]</span></header>
+        <p>A small web app for a nail salon that keeps customer records and texts receipts after each visit.</p>
+        <small>Flask · SQLite · Twilio SMS</small>
+      </article>
+    </div>
+  </section>
+
+  <section id="log">
+    <h2><span>~/</span>log</h2>
+    <ul class="log">
+      <li><time>2025 to 2026</time><p>Minnesota State University, Mankato. First Python course, first real programs.</p></li>
+      <li><time>Summer 2026</time><p>Self-studied CS50 in C: memory, pointers, data structures.</p></li>
+      <li><time>Fall 2026</time><p>Transferred to the University of Memphis, B.S. in Computer Science.</p></li>
+      <li><time class="next">Spring 2027</time><p>COMP 2150, the next step in the CS sequence.</p></li>
+      <li><time class="next">2030</time><p>Expected graduation.</p></li>
+    </ul>
+  </section>
+
+  <section id="contact">
+    <h2><span>~/</span>contact</h2>
+    <div class="contact">
+      <p>Open to internships, campus projects, and anyone who wants to build something together.</p>
+      <div class="mail">
+        <a href="mailto:tvo3@memphis.edu">tvo3@memphis.edu</a>
+        <button type="button" id="copyBtn">Copy email</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>Built with plain HTML, CSS and JavaScript. Memphis, TN.</footer>
+</div>
+
+<script>
+(function () {
+  var body = document.getElementById('termBody');
+  var form = document.getElementById('termForm');
+  var input = document.getElementById('termInput');
+  var EMAIL = 'tvo3@memphis.edu';
+
+  var commands = {
+    help: 'Available commands:\n  about      who I am\n  skills     what I work with\n  projects   things I have built\n  roadmap    where I am headed\n  contact    how to reach me\n  clear      clear the screen',
+    whoami: 'Tuan Phong Vo. CS student, University of Memphis.',
+    about: 'Vietnamese international student in Memphis, TN.\nTransferred from Minnesota State University, Mankato.\nLikes logic, building things, and figuring out why code breaks.',
+    skills: 'languages : Python, C\ntools     : Linux (WSL/Ubuntu), gcc, command line\nlearning  : data structures, HTML/CSS, Flask, AI/ML',
+    projects: '[done]    Image filters in C (grayscale, sepia)\n[done]    Linked lists and manual memory in C\n[planned] Nail salon booking app (Flask + SQLite + Twilio)',
+    roadmap: 'Spring 2027 : COMP 2150\nafter that  : web projects, then AI/ML\n2030        : graduate',
+    contact: 'email: ' + EMAIL,
+    'sudo hire-me': 'Permission granted. Send the offer to ' + EMAIL,
+    ls: 'about  skills  projects  roadmap  contact',
+    pwd: '/home/phong/memphis'
+  };
+
+  function line(cmd) {
+    var d = document.createElement('div');
+    d.className = 'cmd';
+    var ps = document.createElement('span');
+    ps.className = 'ps';
+    ps.textContent = 'phong@memphis:~$ ';
+    d.appendChild(ps);
+    d.appendChild(document.createTextNode(cmd));
+    body.appendChild(d);
+  }
+  function out(text) {
+    var d = document.createElement('div');
+    d.className = 'out';
+    d.textContent = text;
+    body.appendChild(d);
+  }
+  function run(raw) {
+    var cmd = raw.trim().toLowerCase().replace(/\s+/g, ' ');
+    if (!cmd) return;
+    if (cmd === 'clear') { body.textContent = ''; return; }
+    line(raw.trim());
+    out(commands[cmd] || 'command not found: ' + cmd + '\nType help to see what works.');
+    body.scrollTop = body.scrollHeight;
+  }
+
+  // starts with real output so the page is complete without typing anything
+  run('whoami');
+  run('skills');
+  out('Type help, or tap a command below.');
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    run(input.value);
+    input.value = '';
+  });
+  document.getElementById('chips').addEventListener('click', function (e) {
+    var b = e.target.closest('button');
+    if (b) run(b.getAttribute('data-cmd'));
+  });
+
+  var copyBtn = document.getElementById('copyBtn');
+  copyBtn.addEventListener('click', function () {
+    var done = function (msg) {
+      copyBtn.textContent = msg;
+      setTimeout(function () { copyBtn.textContent = 'Copy email'; }, 1600);
+    };
+    try {
+      navigator.clipboard.writeText(EMAIL).then(function () { done('Copied'); }, function () { done('Select and copy'); });
+    } catch (err) { done('Select and copy'); }
+  });
+})();
+</script>
+</body>
+</html>
